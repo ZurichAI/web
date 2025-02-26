@@ -45,6 +45,14 @@ body {
     background-color: lightgray; /* Светло-серый фон */
     h1 { color: blue;}
 }
+#body-image {
+    width: 400px; /* Same width as before, but now in CSS */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px; /* Optional: rounded corners */
+    margin: 20px 0; /* Space above and below the image */
+    display: block; /* Ensures the image behaves like a block element */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
 #date {
     font-size: 1.5em;
@@ -62,4 +70,10 @@ body {
     right: 20px;
     width: 400px; /* Adjust size as needed */
     height: 600px; /* Adjust size as needed */
+}
+@media (max-width: 600px) {
+    #body-image {
+        width: 100%; /* Full width on small screens */
+        margin: 10px 0; /* Less margin on small screens */
+    }
 }
