@@ -234,7 +234,7 @@
                                         Group: student.group,
                                         Instructor: student.instructor,
                                         Birthday: student.birthday,
-                                        StartDate: student.startDate,
+                                        "Start Date": student.startDate,
                                         Active: student.active
                                     }
                                 }))
@@ -373,20 +373,34 @@
                 
                 // Update an existing student
                 updateStudent: async function(id, data) {
-                    const response = await fetch(`${airtableApiUrl}/${id}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    // Log the full request for debugging
+                    if (ENV_CONFIG.debug) {
+                        console.log('PATCH request URL:', `${airtableApiUrl}/${id}`);
+                        console.log('PATCH request body:', JSON.stringify(data));
                     }
                     
-                    return await response.json();
+                    try {
+                        const response = await fetch(`${airtableApiUrl}/${id}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+                        
+                        // If response is not ok, try to get more detailed error information
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Airtable API error response:', errorText);
+                            throw new Error(`Airtable API error: ${response.status} ${response.statusText} - ${errorText}`);
+                        }
+                        
+                        return await response.json();
+                    } catch (error) {
+                        console.error('Error in updateStudent:', error);
+                        throw error;
+                    }
                 },
                 
                 // Delete a student
@@ -473,23 +487,30 @@
                     group: record.fields.Group || '',
                     instructor: record.fields.Instructor || '',
                     birthday: record.fields.Birthday || '',
-                    startDate: record.fields.StartDate || '',
+                    // Use the correct field name for start date
+                    startDate: record.fields["Start Date"] || '',
                     active: record.fields.Active === true
                 };
             }
             
             // Format student object to Airtable fields
             function formatStudentForAirtable(student) {
-                return {
-                    fields: {
-                        Name: student.name,
-                        Group: student.group,
-                        Instructor: student.instructor,
-                        Birthday: student.birthday,
-                        StartDate: student.startDate,
-                        Active: student.active
-                    }
+                // Create fields object with correct Airtable field names
+                const fields = {
+                    Name: student.name,
+                    Group: student.group,
+                    Instructor: student.instructor,
+                    Birthday: student.birthday,
+                    Active: student.active
                 };
+                
+                // Only include startDate if it's not null or empty
+                if (student.startDate && student.startDate.trim() !== '') {
+                    // Use "Start Date" instead of "StartDate" (with a space)
+                    fields["Start Date"] = student.startDate;
+                }
+                
+                return { fields };
             }
             
             // Fetch students
@@ -537,8 +558,15 @@
                         
                         displayResult('Adding student: ' + JSON.stringify(studentData, null, 2));
                         
-                        // Format student data for Airtable
-                        const airtableData = formatStudentForAirtable(studentData);
+                        // Format student data for Airtable (without including the ID in the fields)
+                        const airtableData = formatStudentForAirtable({
+                            name: studentData.name,
+                            group: studentData.group,
+                            instructor: studentData.instructor,
+                            birthday: studentData.birthday,
+                            startDate: studentData.startDate,
+                            active: studentData.active
+                        });
                         
                         if (ENV_CONFIG.debug) {
                             console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} POST operation - Student data:`, airtableData);
@@ -587,8 +615,15 @@
                         
                         displayResult('Updating student: ' + JSON.stringify(studentData, null, 2));
                         
-                        // Format student data for Airtable
-                        const airtableData = formatStudentForAirtable(studentData);
+                        // Format student data for Airtable (without including the ID in the fields)
+                        const airtableData = formatStudentForAirtable({
+                            name: studentData.name,
+                            group: studentData.group,
+                            instructor: studentData.instructor,
+                            birthday: studentData.birthday,
+                            startDate: studentData.startDate,
+                            active: studentData.active
+                        });
                         
                         if (ENV_CONFIG.debug) {
                             console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Student data:`, airtableData);

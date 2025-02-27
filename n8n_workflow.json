@@ -19,56 +19,6 @@
     },
     {
       "parameters": {
-        "functionCode": "// Get operation from query parameter\nconst query = $input.item.query || {};\nconst body = $input.item.body || {};\nconst path = $input.item.params.path || '';\n\n// Log the input for debugging\nconsole.log('Webhook input:', JSON.stringify($input.item, null, 2));\n\n// Get operation from query parameter\nconst operation = query.operation || 'GET';\n\n// For DELETE operation, extract ID from URL path\nif (operation === 'DELETE' && path.match(/\\/([^\\/]+)$/)) {\n  return { operation, id: path.match(/\\/([^\\/]+)$/)[1] };\n}\n\n// For other operations, pass through the data\nreturn { operation, data: body };"
-      },
-      "name": "Extract Operation",
-      "type": "n8n-nodes-base.function",
-      "typeVersion": 1,
-      "position": [
-        450,
-        300
-      ]
-    },
-{
-  "name": "Student API Workflow",
-  "nodes": [
-    {
-      "parameters": {
-        "path": "api/students",
-        "options": {
-          "responseMode": "responseNode"
-        },
-        "authentication": "none"
-      },
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [
-        250,
-        300
-      ]
-    },
-{
-  "name": "Student API Workflow",
-  "nodes": [
-    {
-      "parameters": {
-        "path": "api/students",
-        "options": {
-          "responseMode": "responseNode"
-        },
-        "authentication": "none"
-      },
-      "name": "Webhook",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 1,
-      "position": [
-        250,
-        300
-      ]
-    },
-    {
-      "parameters": {
         "functionCode": "// Determine the operation type based on request characteristics\nconst headers = $input.item.headers || {};\nconst params = $input.item.params || {};\nconst query = $input.item.query || {};\nconst body = $input.item.body || {};\nconst path = $input.item.params.path || '';\n\n// Log the input for debugging\nconsole.log('Webhook input:', JSON.stringify($input.item, null, 2));\n\n// Check if this is a DELETE operation (URL path contains an ID)\nif (path.match(/\\/([^\\/]+)$/)) {\n  return { operation: 'DELETE', id: path.match(/\\/([^\\/]+)$/)[1] };\n}\n\n// Check if this is a PUT operation (has body with ID)\nelse if (body && body.id) {\n  return { operation: 'PUT', data: body };\n}\n\n// Check if this is a POST operation (has body but no ID)\nelse if (body && Object.keys(body).length > 0) {\n  return { operation: 'POST', data: body };\n}\n\n// Default to GET operation\nelse {\n  return { operation: 'GET' };\n}"
       },
       "name": "Determine Operation",
@@ -181,7 +131,7 @@
               "value": "={{ $json.data.birthday }}"
             },
             {
-              "name": "StartDate",
+              "name": "Start Date",
               "value": "={{ $json.data.startDate }}"
             },
             {
@@ -261,7 +211,7 @@
               "value": "={{ $json.data.birthday }}"
             },
             {
-              "name": "StartDate",
+              "name": "Start Date",
               "value": "={{ $json.data.startDate }}"
             },
             {
