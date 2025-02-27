@@ -7,6 +7,61 @@
     <meta name="description" content="This website is a sandbox environment used for testing code, debugging, and development experiments. Content displayed here is not official and should not be considered as a product.">
     <title>About Page</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Added Airtable API integration -->
+    <script>
+        // Airtable API configuration
+        const AIRTABLE_CONFIG = {
+            apiKey: 'patDOF9oxwBSX51xF.35a49f7d32794d0af49cbb224077937df851caf037eb821dd46034e79018b111',
+            baseId: 'appTgYGpfTSWAPkLC',
+            tableId: 'tblclIYLAoNfisfA4',
+            tableName: 'Contacts'
+        };
+        
+        // Environment configuration
+        const ENV_CONFIG = {
+            // Use mock data when running from a local file (file:// protocol)
+            useMockData: window.location.protocol === 'file:',
+            // Log detailed information to console
+            debug: true
+        };
+        
+        // Mock data for local testing
+        const MOCK_DATA = {
+            students: [
+                {
+                    id: 'rec123456789',
+                    name: 'John Doe',
+                    group: 'Group A',
+                    instructor: 'Instructor 1',
+                    birthday: '1990-01-15',
+                    startDate: '2023-09-01',
+                    active: true
+                },
+                {
+                    id: 'rec987654321',
+                    name: 'Jane Smith',
+                    group: 'Group B',
+                    instructor: 'Instructor 2',
+                    birthday: '1992-05-20',
+                    startDate: '2023-09-15',
+                    active: true
+                },
+                {
+                    id: 'rec456789123',
+                    name: 'Michael Johnson',
+                    group: 'Group A',
+                    instructor: 'Instructor 1',
+                    birthday: '1988-11-10',
+                    startDate: '2023-08-01',
+                    active: false
+                }
+            ],
+            // Generate a unique ID for new records
+            generateId: function() {
+                return 'rec' + Math.random().toString(36).substring(2, 15);
+            }
+        };
+    </script>
 </head>
 <body>
     <header>
@@ -17,13 +72,589 @@
         <nav>
             <a href="about.html">About</a>
             <a href="#">Our Services</a>
-            <a href="contact.html">Let’s Talk</a>
-            <a href="#">Log In</a>
+            <a href="contact.html">Let's Talk</a>
+            <a href="instructor.html">Instructor Portal</a>
         </nav>
     </header>
-    <h1>
-        This page is to test the About content.
-    </h1>
-    <script src = "script.js"> </script>
+    <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <h1>Airtable API Testing</h1>
+        <p>Use this page to test direct Airtable API calls for the Instructor Portal.</p>
+        
+        <!-- Tabs for different webhook tests -->
+        <div class="tab-container" style="margin-bottom: 20px;">
+            <button class="tab-button active" data-tab="get-students" style="background-color: #f2f2f2; border: 1px solid #ddd; border-bottom: none; padding: 10px 15px; cursor: pointer; border-radius: 4px 4px 0 0;">
+                Get Students
+            </button>
+            <button class="tab-button" data-tab="add-student" style="background-color: #f2f2f2; border: 1px solid #ddd; border-bottom: none; padding: 10px 15px; cursor: pointer; border-radius: 4px 4px 0 0;">
+                Add Student
+            </button>
+            <button class="tab-button" data-tab="update-student" style="background-color: #f2f2f2; border: 1px solid #ddd; border-bottom: none; padding: 10px 15px; cursor: pointer; border-radius: 4px 4px 0 0;">
+                Update Student
+            </button>
+            <button class="tab-button" data-tab="delete-student" style="background-color: #f2f2f2; border: 1px solid #ddd; border-bottom: none; padding: 10px 15px; cursor: pointer; border-radius: 4px 4px 0 0;">
+                Delete Student
+            </button>
+        </div>
+        
+        <!-- Tab content -->
+        <div class="tab-content-container" style="border: 1px solid #ddd; padding: 20px; border-radius: 0 0 4px 4px;">
+            <!-- Get Students Tab -->
+            <div id="get-students" class="tab-content active" style="display: block;">
+                <h3>Get Students</h3>
+                <p>Fetch all students from Airtable.</p>
+                <button id="fetch-students" style="background-color: #1e90ff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                    Fetch Students
+                </button>
+            </div>
+            
+            <!-- Add Student Tab -->
+            <div id="add-student" class="tab-content" style="display: none;">
+                <h3>Add Student</h3>
+                <p>Add a new student to Airtable.</p>
+                <form id="add-student-form">
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+                        <input type="text" id="new-name" name="name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-group" style="display: block; margin-bottom: 5px; font-weight: bold;">Group:</label>
+                        <input type="text" id="new-group" name="group" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-instructor" style="display: block; margin-bottom: 5px; font-weight: bold;">Instructor:</label>
+                        <input type="text" id="new-instructor" name="instructor" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-birthday" style="display: block; margin-bottom: 5px; font-weight: bold;">Birthday:</label>
+                        <input type="date" id="new-birthday" name="birthday" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-startDate" style="display: block; margin-bottom: 5px; font-weight: bold;">Start Date:</label>
+                        <input type="date" id="new-startDate" name="startDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="new-active" style="display: block; margin-bottom: 5px; font-weight: bold;">Active:</label>
+                        <select id="new-active" name="active" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="background-color: #1e90ff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                        Add Student
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Update Student Tab -->
+            <div id="update-student" class="tab-content" style="display: none;">
+                <h3>Update Student</h3>
+                <p>Update an existing student in Airtable.</p>
+                <form id="update-student-form">
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-id" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID:</label>
+                        <input type="text" id="update-id" name="id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-name" style="display: block; margin-bottom: 5px; font-weight: bold;">Name:</label>
+                        <input type="text" id="update-name" name="name" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-group" style="display: block; margin-bottom: 5px; font-weight: bold;">Group:</label>
+                        <input type="text" id="update-group" name="group" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-instructor" style="display: block; margin-bottom: 5px; font-weight: bold;">Instructor:</label>
+                        <input type="text" id="update-instructor" name="instructor" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-birthday" style="display: block; margin-bottom: 5px; font-weight: bold;">Birthday:</label>
+                        <input type="date" id="update-birthday" name="birthday" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-startDate" style="display: block; margin-bottom: 5px; font-weight: bold;">Start Date:</label>
+                        <input type="date" id="update-startDate" name="startDate" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label for="update-active" style="display: block; margin-bottom: 5px; font-weight: bold;">Active:</label>
+                        <select id="update-active" name="active" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <button type="submit" style="background-color: #1e90ff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                        Update Student
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Delete Student Tab -->
+            <div id="delete-student" class="tab-content" style="display: none;">
+                <h3>Delete Student</h3>
+                <p>Delete a student from Airtable.</p>
+                <form id="delete-student-form">
+                    <div style="margin-bottom: 10px;">
+                        <label for="delete-id" style="display: block; margin-bottom: 5px; font-weight: bold;">Student ID:</label>
+                        <input type="text" id="delete-id" name="id" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                    </div>
+                    <button type="submit" style="background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer;">
+                        Delete Student
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Results Display -->
+        <div class="results-container" style="margin-top: 30px; padding: 15px; background-color: #f5f5f5; border-radius: 5px;">
+            <h3>Results</h3>
+            <div id="results-display" style="background-color: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; min-height: 200px; overflow: auto; white-space: pre-wrap; font-family: monospace;">
+                Results will appear here...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Airtable API base URL
+            const airtableApiUrl = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+            
+            // Mock API service for local development
+            const mockApiService = {
+                // Get all students
+                getStudents: function() {
+                    return new Promise((resolve) => {
+                        // Simulate network delay
+                        setTimeout(() => {
+                            // Format mock data to match Airtable API response
+                            const response = {
+                                records: MOCK_DATA.students.map(student => ({
+                                    id: student.id,
+                                    fields: {
+                                        Name: student.name,
+                                        Group: student.group,
+                                        Instructor: student.instructor,
+                                        Birthday: student.birthday,
+                                        StartDate: student.startDate,
+                                        Active: student.active
+                                    }
+                                }))
+                            };
+                            resolve(response);
+                        }, 500);
+                    });
+                },
+                
+                // Add a new student
+                addStudent: function(data) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            // Generate a new ID
+                            const newId = MOCK_DATA.generateId();
+                            
+                            // Create new student record
+                            const newStudent = {
+                                id: newId,
+                                fields: data.fields
+                            };
+                            
+                            // Add to mock data
+                            MOCK_DATA.students.push({
+                                id: newId,
+                                name: data.fields.Name,
+                                group: data.fields.Group,
+                                instructor: data.fields.Instructor,
+                                birthday: data.fields.Birthday,
+                                startDate: data.fields.StartDate,
+                                active: data.fields.Active
+                            });
+                            
+                            resolve(newStudent);
+                        }, 500);
+                    });
+                },
+                
+                // Update an existing student
+                updateStudent: function(id, data) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            // Find student by ID
+                            const studentIndex = MOCK_DATA.students.findIndex(s => s.id === id);
+                            
+                            if (studentIndex === -1) {
+                                reject(new Error('Student not found'));
+                                return;
+                            }
+                            
+                            // Update student data
+                            MOCK_DATA.students[studentIndex] = {
+                                id: id,
+                                name: data.fields.Name,
+                                group: data.fields.Group,
+                                instructor: data.fields.Instructor,
+                                birthday: data.fields.Birthday,
+                                startDate: data.fields.StartDate,
+                                active: data.fields.Active
+                            };
+                            
+                            // Format response to match Airtable API
+                            const response = {
+                                id: id,
+                                fields: data.fields
+                            };
+                            
+                            resolve(response);
+                        }, 500);
+                    });
+                },
+                
+                // Delete a student
+                deleteStudent: function(id) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            // Find student by ID
+                            const studentIndex = MOCK_DATA.students.findIndex(s => s.id === id);
+                            
+                            if (studentIndex === -1) {
+                                reject(new Error('Student not found'));
+                                return;
+                            }
+                            
+                            // Remove student from mock data
+                            MOCK_DATA.students.splice(studentIndex, 1);
+                            
+                            // Format response to match Airtable API
+                            const response = {
+                                id: id,
+                                deleted: true
+                            };
+                            
+                            resolve(response);
+                        }, 500);
+                    });
+                }
+            };
+            
+            // Real Airtable API service
+            const airtableApiService = {
+                // Get all students
+                getStudents: async function() {
+                    const response = await fetch(airtableApiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                },
+                
+                // Add a new student
+                addStudent: async function(data) {
+                    const response = await fetch(airtableApiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                },
+                
+                // Update an existing student
+                updateStudent: async function(id, data) {
+                    const response = await fetch(`${airtableApiUrl}/${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                },
+                
+                // Delete a student
+                deleteStudent: async function(id) {
+                    const response = await fetch(`${airtableApiUrl}/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                    }
+                    
+                    return await response.json();
+                }
+            };
+            
+            // Use the appropriate API service based on environment
+            const apiService = ENV_CONFIG.useMockData ? mockApiService : airtableApiService;
+            
+            // DOM Elements
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const fetchStudentsButton = document.getElementById('fetch-students');
+            const addStudentForm = document.getElementById('add-student-form');
+            const updateStudentForm = document.getElementById('update-student-form');
+            const deleteStudentForm = document.getElementById('delete-student-form');
+            const resultsDisplay = document.getElementById('results-display');
+            
+            // Tab switching
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    
+                    // Update active tab button
+                    tabButtons.forEach(btn => {
+                        if (btn.getAttribute('data-tab') === tabId) {
+                            btn.classList.add('active');
+                            btn.style.backgroundColor = 'white';
+                            btn.style.borderBottom = '1px solid white';
+                        } else {
+                            btn.classList.remove('active');
+                            btn.style.backgroundColor = '#f2f2f2';
+                            btn.style.borderBottom = 'none';
+                        }
+                    });
+                    
+                    // Update active tab content
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.style.display = 'block';
+                        } else {
+                            content.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        
+            // Display results
+            function displayResult(result) {
+                if (resultsDisplay) {
+                    if (typeof result === 'object') {
+                        resultsDisplay.textContent = JSON.stringify(result, null, 2);
+                    } else {
+                        resultsDisplay.textContent = result;
+                    }
+                }
+            }
+            
+            // Handle API errors
+            function handleApiError(error) {
+                console.error('API Error:', error);
+                displayResult('Error: ' + (error.message || 'Unknown error occurred'));
+            }
+            
+            // Format Airtable record to student object
+            function formatAirtableRecord(record) {
+                return {
+                    id: record.id,
+                    name: record.fields.Name || '',
+                    group: record.fields.Group || '',
+                    instructor: record.fields.Instructor || '',
+                    birthday: record.fields.Birthday || '',
+                    startDate: record.fields.StartDate || '',
+                    active: record.fields.Active === true
+                };
+            }
+            
+            // Format student object to Airtable fields
+            function formatStudentForAirtable(student) {
+                return {
+                    fields: {
+                        Name: student.name,
+                        Group: student.group,
+                        Instructor: student.instructor,
+                        Birthday: student.birthday,
+                        StartDate: student.startDate,
+                        Active: student.active
+                    }
+                };
+            }
+            
+            // Fetch students
+            if (fetchStudentsButton) {
+                fetchStudentsButton.addEventListener('click', async () => {
+                    try {
+                        displayResult('Fetching students...');
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} GET operation - Sending request...`);
+                        }
+                        
+                        // Get students from the appropriate API service
+                        const data = await apiService.getStudents();
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} GET operation - Response data:`, data);
+                        }
+                        
+                        // Format Airtable records to student objects
+                        const students = data.records.map(formatAirtableRecord);
+                        
+                        displayResult(students);
+                    } catch (error) {
+                        handleApiError(error);
+                    }
+                });
+            }
+            
+            // Add student
+            if (addStudentForm) {
+                addStudentForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    
+                    try {
+                        const formData = new FormData(addStudentForm);
+                        const studentData = {
+                            name: formData.get('name'),
+                            group: formData.get('group'),
+                            instructor: formData.get('instructor'),
+                            birthday: formData.get('birthday'),
+                            startDate: formData.get('startDate'),
+                            active: formData.get('active') === 'true'
+                        };
+                        
+                        displayResult('Adding student: ' + JSON.stringify(studentData, null, 2));
+                        
+                        // Format student data for Airtable
+                        const airtableData = formatStudentForAirtable(studentData);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} POST operation - Student data:`, airtableData);
+                        }
+                        
+                        // Add student using the appropriate API service
+                        const data = await apiService.addStudent(airtableData);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} POST operation - Response data:`, data);
+                        }
+                        
+                        // Format the response
+                        const createdStudent = formatAirtableRecord(data);
+                        
+                        displayResult({
+                            message: 'Student added successfully',
+                            student: createdStudent
+                        });
+                        
+                        // Reset form
+                        addStudentForm.reset();
+                    } catch (error) {
+                        handleApiError(error);
+                    }
+                });
+            }
+            
+            // Update student
+            if (updateStudentForm) {
+                updateStudentForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    
+                    try {
+                        const formData = new FormData(updateStudentForm);
+                        const studentId = formData.get('id');
+                        const studentData = {
+                            id: studentId,
+                            name: formData.get('name'),
+                            group: formData.get('group'),
+                            instructor: formData.get('instructor'),
+                            birthday: formData.get('birthday'),
+                            startDate: formData.get('startDate'),
+                            active: formData.get('active') === 'true'
+                        };
+                        
+                        displayResult('Updating student: ' + JSON.stringify(studentData, null, 2));
+                        
+                        // Format student data for Airtable
+                        const airtableData = formatStudentForAirtable(studentData);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Student data:`, airtableData);
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Student ID:`, studentId);
+                        }
+                        
+                        // Update student using the appropriate API service
+                        const data = await apiService.updateStudent(studentId, airtableData);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Response data:`, data);
+                        }
+                        
+                        // Format the response
+                        const updatedStudent = formatAirtableRecord(data);
+                        
+                        displayResult({
+                            message: 'Student updated successfully',
+                            student: updatedStudent
+                        });
+                    } catch (error) {
+                        handleApiError(error);
+                    }
+                });
+            }
+            
+            // Delete student
+            if (deleteStudentForm) {
+                deleteStudentForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    
+                    try {
+                        const deleteIdInput = document.getElementById('delete-id');
+                        if (!deleteIdInput) {
+                            displayResult('Error: Could not find delete-id input element');
+                            return;
+                        }
+                        
+                        const studentId = deleteIdInput.value;
+                        
+                        displayResult('Deleting student with ID: ' + studentId);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} DELETE operation - Student ID:`, studentId);
+                        }
+                        
+                        // Delete student using the appropriate API service
+                        const data = await apiService.deleteStudent(studentId);
+                        
+                        if (ENV_CONFIG.debug) {
+                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} DELETE operation - Response data:`, data);
+                        }
+                        
+                        displayResult({
+                            message: 'Student deleted successfully',
+                            id: data.id
+                        });
+                        
+                        // Reset form
+                        deleteStudentForm.reset();
+                    } catch (error) {
+                        handleApiError(error);
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

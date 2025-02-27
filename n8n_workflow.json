@@ -1,0 +1,616 @@
+{
+  "name": "Student API Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "api/students",
+        "options": {
+          "responseMode": "responseNode"
+        },
+        "authentication": "none"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Get operation from query parameter\nconst query = $input.item.query || {};\nconst body = $input.item.body || {};\nconst path = $input.item.params.path || '';\n\n// Log the input for debugging\nconsole.log('Webhook input:', JSON.stringify($input.item, null, 2));\n\n// Get operation from query parameter\nconst operation = query.operation || 'GET';\n\n// For DELETE operation, extract ID from URL path\nif (operation === 'DELETE' && path.match(/\\/([^\\/]+)$/)) {\n  return { operation, id: path.match(/\\/([^\\/]+)$/)[1] };\n}\n\n// For other operations, pass through the data\nreturn { operation, data: body };"
+      },
+      "name": "Extract Operation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+{
+  "name": "Student API Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "api/students",
+        "options": {
+          "responseMode": "responseNode"
+        },
+        "authentication": "none"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+{
+  "name": "Student API Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "api/students",
+        "options": {
+          "responseMode": "responseNode"
+        },
+        "authentication": "none"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Determine the operation type based on request characteristics\nconst headers = $input.item.headers || {};\nconst params = $input.item.params || {};\nconst query = $input.item.query || {};\nconst body = $input.item.body || {};\nconst path = $input.item.params.path || '';\n\n// Log the input for debugging\nconsole.log('Webhook input:', JSON.stringify($input.item, null, 2));\n\n// Check if this is a DELETE operation (URL path contains an ID)\nif (path.match(/\\/([^\\/]+)$/)) {\n  return { operation: 'DELETE', id: path.match(/\\/([^\\/]+)$/)[1] };\n}\n\n// Check if this is a PUT operation (has body with ID)\nelse if (body && body.id) {\n  return { operation: 'PUT', data: body };\n}\n\n// Check if this is a POST operation (has body but no ID)\nelse if (body && Object.keys(body).length > 0) {\n  return { operation: 'POST', data: body };\n}\n\n// Default to GET operation\nelse {\n  return { operation: 'GET' };\n}"
+      },
+      "name": "Determine Operation",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.operation }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "GET",
+              "output": 0
+            },
+            {
+              "value2": "POST",
+              "output": 1
+            },
+            {
+              "value2": "PUT",
+              "output": 2
+            },
+            {
+              "value2": "DELETE",
+              "output": 3
+            }
+          ]
+        }
+      },
+      "name": "Switch (Operation)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "application": "airtable",
+        "operation": "list",
+        "baseId": "={{ $env.AIRTABLE_BASE_ID }}",
+        "tableId": "={{ $env.AIRTABLE_TABLE_ID }}",
+        "returnAll": true
+      },
+      "name": "Airtable (GET)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        850,
+        100
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "data",
+              "value": "={{ $json }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (GET Response)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "application": "airtable",
+        "operation": "create",
+        "baseId": "={{ $env.AIRTABLE_BASE_ID }}",
+        "tableId": "={{ $env.AIRTABLE_TABLE_ID }}",
+        "options": {},
+        "fields": {
+          "fields": [
+            {
+              "name": "Name",
+              "value": "={{ $json.data.name }}"
+            },
+            {
+              "name": "Group",
+              "value": "={{ $json.data.group }}"
+            },
+            {
+              "name": "Instructor",
+              "value": "={{ $json.data.instructor }}"
+            },
+            {
+              "name": "Birthday",
+              "value": "={{ $json.data.birthday }}"
+            },
+            {
+              "name": "StartDate",
+              "value": "={{ $json.data.startDate }}"
+            },
+            {
+              "name": "Active",
+              "value": "={{ $json.data.active }}"
+            }
+          ]
+        }
+      },
+      "name": "Airtable (POST)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        850,
+        300
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "success",
+              "value": "true"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "name": "message",
+              "value": "Student added successfully"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (POST Response)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "application": "airtable",
+        "operation": "update",
+        "baseId": "={{ $env.AIRTABLE_BASE_ID }}",
+        "tableId": "={{ $env.AIRTABLE_TABLE_ID }}",
+        "id": "={{ $json.data.id }}",
+        "options": {},
+        "fields": {
+          "fields": [
+            {
+              "name": "Name",
+              "value": "={{ $json.data.name }}"
+            },
+            {
+              "name": "Group",
+              "value": "={{ $json.data.group }}"
+            },
+            {
+              "name": "Instructor",
+              "value": "={{ $json.data.instructor }}"
+            },
+            {
+              "name": "Birthday",
+              "value": "={{ $json.data.birthday }}"
+            },
+            {
+              "name": "StartDate",
+              "value": "={{ $json.data.startDate }}"
+            },
+            {
+              "name": "Active",
+              "value": "={{ $json.data.active }}"
+            }
+          ]
+        }
+      },
+      "name": "Airtable (PUT)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        850,
+        500
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "success",
+              "value": "true"
+            },
+            {
+              "name": "message",
+              "value": "Student updated successfully"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (PUT Response)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "application": "airtable",
+        "operation": "delete",
+        "baseId": "={{ $env.AIRTABLE_BASE_ID }}",
+        "tableId": "={{ $env.AIRTABLE_TABLE_ID }}",
+        "id": "={{ $json.id }}"
+      },
+      "name": "Airtable (DELETE)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        850,
+        700
+      ],
+      "credentials": {
+        "airtableApi": {
+          "id": "1",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "success",
+              "value": "true"
+            },
+            {
+              "name": "message",
+              "value": "Student deleted successfully"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Set (DELETE Response)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        1050,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "name": "Join",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        1250,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1450,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## GET Students\nFetches all students from Airtable",
+        "height": 60,
+        "width": 400
+      },
+      "name": "GET Students Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        850,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## POST Student\nAdds a new student to Airtable",
+        "height": 60,
+        "width": 400
+      },
+      "name": "POST Student Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## PUT Student\nUpdates an existing student in Airtable",
+        "height": 60,
+        "width": 400
+      },
+      "name": "PUT Student Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        850,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## DELETE Student\nDeletes a student from Airtable",
+        "height": 60,
+        "width": 400
+      },
+      "name": "DELETE Student Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        850,
+        600
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Determine Operation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Determine Operation": {
+      "main": [
+        [
+          {
+            "node": "Switch (Operation)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch (Operation)": {
+      "main": [
+        [
+          {
+            "node": "Airtable (GET)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Airtable (POST)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Airtable (PUT)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Airtable (DELETE)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable (GET)": {
+      "main": [
+        [
+          {
+            "node": "Set (GET Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (GET Response)": {
+      "main": [
+        [
+          {
+            "node": "Join",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airtable (POST)": {
+      "main": [
+        [
+          {
+            "node": "Set (POST Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (POST Response)": {
+      "main": [
+        [
+          {
+            "node": "Join",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Airtable (PUT)": {
+      "main": [
+        [
+          {
+            "node": "Set (PUT Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (PUT Response)": {
+      "main": [
+        [
+          {
+            "node": "Join",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Airtable (DELETE)": {
+      "main": [
+        [
+          {
+            "node": "Set (DELETE Response)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set (DELETE Response)": {
+      "main": [
+        [
+          {
+            "node": "Join",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Join": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "Airtable"
+    },
+    {
+      "name": "API"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-02-27T20:30:00.000Z",
+  "versionId": "1"
+}

@@ -1,0 +1,29 @@
+{
+  "instructors": [
+    {
+      "email": "instructor1@example.com",
+      "password": "password1",
+      "name": "Instructor 1"
+    },
+    {
+      "email": "instructor2@example.com",
+      "password": "password2",
+      "name": "Instructor 2"
+    },
+    {
+      "email": "instructor3@example.com",
+      "password": "password3",
+      "name": "Instructor 3"
+    },
+    {
+      "email": "instructor4@example.com",
+      "password": "password4",
+      "name": "Instructor 4"
+    },
+    {
+      "email": "instructor5@example.com",
+      "password": "password5",
+      "name": "Instructor 5"
+    }
+  ]
+}
