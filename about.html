@@ -19,8 +19,8 @@
         
         // Environment configuration
         const ENV_CONFIG = {
-            // Use mock data when running from a local file (file:// protocol)
-            useMockData: window.location.protocol === 'file:',
+            // Always use real data (even when running from a local file)
+            useMockData: false,
             // Log detailed information to console
             debug: true
         };
