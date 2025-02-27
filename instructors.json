@@ -1,29 +1,24 @@
 {
   "instructors": [
     {
-      "email": "instructor1@example.com",
-      "password": "password1",
-      "name": "Instructor 1"
+      "name": "Instructor 1",
+      "password": "password1"
     },
     {
-      "email": "instructor2@example.com",
-      "password": "password2",
-      "name": "Instructor 2"
+      "name": "Instructor 2",
+      "password": "password2"
     },
     {
-      "email": "instructor3@example.com",
-      "password": "password3",
-      "name": "Instructor 3"
+      "name": "Instructor 3",
+      "password": "password3"
     },
     {
-      "email": "instructor4@example.com",
-      "password": "password4",
-      "name": "Instructor 4"
+      "name": "Instructor 4",
+      "password": "password4"
     },
     {
-      "email": "instructor5@example.com",
-      "password": "password5",
-      "name": "Instructor 5"
+      "name": "Instructor 5",
+      "password": "password5"
     }
   ]
 }

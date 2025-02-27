@@ -7,59 +7,13 @@
     <meta name="description" content="This website is a sandbox environment used for testing code, debugging, and development experiments. Content displayed here is not official and should not be considered as a product.">
     <title>About Page</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Added Airtable API integration -->
+    <!-- Include config.js for Airtable API configuration -->
+    <script src="config.js"></script>
     <script>
-        // Airtable API configuration
-        const AIRTABLE_CONFIG = {
-            apiKey: 'patDOF9oxwBSX51xF.35a49f7d32794d0af49cbb224077937df851caf037eb821dd46034e79018b111',
-            baseId: 'appTgYGpfTSWAPkLC',
-            tableId: 'tblclIYLAoNfisfA4',
-            tableName: 'Contacts'
-        };
-        
         // Environment configuration
         const ENV_CONFIG = {
-            // Always use real data (even when running from a local file)
-            useMockData: false,
             // Log detailed information to console
             debug: true
-        };
-        
-        // Mock data for local testing
-        const MOCK_DATA = {
-            students: [
-                {
-                    id: 'rec123456789',
-                    name: 'John Doe',
-                    group: 'Group A',
-                    instructor: 'Instructor 1',
-                    birthday: '1990-01-15',
-                    startDate: '2023-09-01',
-                    active: true
-                },
-                {
-                    id: 'rec987654321',
-                    name: 'Jane Smith',
-                    group: 'Group B',
-                    instructor: 'Instructor 2',
-                    birthday: '1992-05-20',
-                    startDate: '2023-09-15',
-                    active: true
-                },
-                {
-                    id: 'rec456789123',
-                    name: 'Michael Johnson',
-                    group: 'Group A',
-                    instructor: 'Instructor 1',
-                    birthday: '1988-11-10',
-                    startDate: '2023-08-01',
-                    active: false
-                }
-            ],
-            // Generate a unique ID for new records
-            generateId: function() {
-                return 'rec' + Math.random().toString(36).substring(2, 15);
-            }
         };
     </script>
 </head>
@@ -72,7 +26,6 @@
         <nav>
             <a href="about.html">About</a>
             <a href="#">Our Services</a>
-            <a href="contact.html">Let's Talk</a>
             <a href="instructor.html">Instructor Portal</a>
         </nav>
     </header>
@@ -80,7 +33,7 @@
         <h1>Airtable API Testing</h1>
         <p>Use this page to test direct Airtable API calls for the Instructor Portal.</p>
         
-        <!-- Tabs for different webhook tests -->
+        <!-- Tabs for different API tests -->
         <div class="tab-container" style="margin-bottom: 20px;">
             <button class="tab-button active" data-tab="get-students" style="background-color: #f2f2f2; border: 1px solid #ddd; border-bottom: none; padding: 10px 15px; cursor: pointer; border-radius: 4px 4px 0 0;">
                 Get Students
@@ -216,132 +169,16 @@
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Airtable API base URL
-            const airtableApiUrl = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`;
+            const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.students}`;
             
-            // Mock API service for local development
-            const mockApiService = {
-                // Get all students
-                getStudents: function() {
-                    return new Promise((resolve) => {
-                        // Simulate network delay
-                        setTimeout(() => {
-                            // Format mock data to match Airtable API response
-                            const response = {
-                                records: MOCK_DATA.students.map(student => ({
-                                    id: student.id,
-                                    fields: {
-                                        Name: student.name,
-                                        Group: student.group,
-                                        Instructor: student.instructor,
-                                        Birthday: student.birthday,
-                                        "Start Date": student.startDate,
-                                        Active: student.active
-                                    }
-                                }))
-                            };
-                            resolve(response);
-                        }, 500);
-                    });
-                },
-                
-                // Add a new student
-                addStudent: function(data) {
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            // Generate a new ID
-                            const newId = MOCK_DATA.generateId();
-                            
-                            // Create new student record
-                            const newStudent = {
-                                id: newId,
-                                fields: data.fields
-                            };
-                            
-                            // Add to mock data
-                            MOCK_DATA.students.push({
-                                id: newId,
-                                name: data.fields.Name,
-                                group: data.fields.Group,
-                                instructor: data.fields.Instructor,
-                                birthday: data.fields.Birthday,
-                                startDate: data.fields.StartDate,
-                                active: data.fields.Active
-                            });
-                            
-                            resolve(newStudent);
-                        }, 500);
-                    });
-                },
-                
-                // Update an existing student
-                updateStudent: function(id, data) {
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                            // Find student by ID
-                            const studentIndex = MOCK_DATA.students.findIndex(s => s.id === id);
-                            
-                            if (studentIndex === -1) {
-                                reject(new Error('Student not found'));
-                                return;
-                            }
-                            
-                            // Update student data
-                            MOCK_DATA.students[studentIndex] = {
-                                id: id,
-                                name: data.fields.Name,
-                                group: data.fields.Group,
-                                instructor: data.fields.Instructor,
-                                birthday: data.fields.Birthday,
-                                startDate: data.fields.StartDate,
-                                active: data.fields.Active
-                            };
-                            
-                            // Format response to match Airtable API
-                            const response = {
-                                id: id,
-                                fields: data.fields
-                            };
-                            
-                            resolve(response);
-                        }, 500);
-                    });
-                },
-                
-                // Delete a student
-                deleteStudent: function(id) {
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => {
-                            // Find student by ID
-                            const studentIndex = MOCK_DATA.students.findIndex(s => s.id === id);
-                            
-                            if (studentIndex === -1) {
-                                reject(new Error('Student not found'));
-                                return;
-                            }
-                            
-                            // Remove student from mock data
-                            MOCK_DATA.students.splice(studentIndex, 1);
-                            
-                            // Format response to match Airtable API
-                            const response = {
-                                id: id,
-                                deleted: true
-                            };
-                            
-                            resolve(response);
-                        }, 500);
-                    });
-                }
-            };
-            
-            // Real Airtable API service
+            // Airtable API service
             const airtableApiService = {
                 // Get all students
                 getStudents: async function() {
                     const response = await fetch(airtableApiUrl, {
                         method: 'GET',
                         headers: {
-                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Authorization': `Bearer ${config.airtable.apiKey}`,
                             'Content-Type': 'application/json'
                         }
                     });
@@ -358,7 +195,7 @@
                     const response = await fetch(airtableApiUrl, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Authorization': `Bearer ${config.airtable.apiKey}`,
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(data)
@@ -383,7 +220,7 @@
                         const response = await fetch(`${airtableApiUrl}/${id}`, {
                             method: 'PATCH',
                             headers: {
-                                'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                                'Authorization': `Bearer ${config.airtable.apiKey}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(data)
@@ -408,7 +245,7 @@
                     const response = await fetch(`${airtableApiUrl}/${id}`, {
                         method: 'DELETE',
                         headers: {
-                            'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                            'Authorization': `Bearer ${config.airtable.apiKey}`,
                             'Content-Type': 'application/json'
                         }
                     });
@@ -420,9 +257,6 @@
                     return await response.json();
                 }
             };
-            
-            // Use the appropriate API service based on environment
-            const apiService = ENV_CONFIG.useMockData ? mockApiService : airtableApiService;
             
             // DOM Elements
             const tabButtons = document.querySelectorAll('.tab-button');
@@ -520,14 +354,14 @@
                         displayResult('Fetching students...');
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} GET operation - Sending request...`);
+                            console.log('GET operation - Sending request...');
                         }
                         
-                        // Get students from the appropriate API service
-                        const data = await apiService.getStudents();
+                        // Get students from the API service
+                        const data = await airtableApiService.getStudents();
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} GET operation - Response data:`, data);
+                            console.log('GET operation - Response data:', data);
                         }
                         
                         // Format Airtable records to student objects
@@ -569,14 +403,14 @@
                         });
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} POST operation - Student data:`, airtableData);
+                            console.log('POST operation - Student data:', airtableData);
                         }
                         
-                        // Add student using the appropriate API service
-                        const data = await apiService.addStudent(airtableData);
+                        // Add student using the API service
+                        const data = await airtableApiService.addStudent(airtableData);
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} POST operation - Response data:`, data);
+                            console.log('POST operation - Response data:', data);
                         }
                         
                         // Format the response
@@ -626,15 +460,15 @@
                         });
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Student data:`, airtableData);
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Student ID:`, studentId);
+                            console.log('PATCH operation - Student data:', airtableData);
+                            console.log('PATCH operation - Student ID:', studentId);
                         }
                         
-                        // Update student using the appropriate API service
-                        const data = await apiService.updateStudent(studentId, airtableData);
+                        // Update student using the API service
+                        const data = await airtableApiService.updateStudent(studentId, airtableData);
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} PATCH operation - Response data:`, data);
+                            console.log('PATCH operation - Response data:', data);
                         }
                         
                         // Format the response
@@ -667,14 +501,14 @@
                         displayResult('Deleting student with ID: ' + studentId);
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} DELETE operation - Student ID:`, studentId);
+                            console.log('DELETE operation - Student ID:', studentId);
                         }
                         
-                        // Delete student using the appropriate API service
-                        const data = await apiService.deleteStudent(studentId);
+                        // Delete student using the API service
+                        const data = await airtableApiService.deleteStudent(studentId);
                         
                         if (ENV_CONFIG.debug) {
-                            console.log(`${ENV_CONFIG.useMockData ? 'MOCK' : 'REAL'} DELETE operation - Response data:`, data);
+                            console.log('DELETE operation - Response data:', data);
                         }
                         
                         displayResult({
