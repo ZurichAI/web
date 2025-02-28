@@ -251,16 +251,7 @@
                 </table>
             </div>
             
-            <!-- Side Containers for Stage 2 -->
-            <div class="side-containers">
-                <div class="reserved-container">
-                    <h3>Reserved container 2 for new functions (Stage 2)</h3>
-                </div>
-                
-                <div class="reserved-container">
-                    <h3>Reserved container 3 for new functions (Stage 2)</h3>
-                </div>
-            </div>
+            <!-- Side Containers section removed -->
         </div>
     </div>
     
@@ -274,6 +265,33 @@
             <div class="dialog-buttons">
                 <button id="cancel-comment-btn">Cancel</button>
                 <button id="save-comment-btn" disabled>Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for viewing student comments -->
+    <div class="dialog-overlay" id="view-comments-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Student Comments</h3>
+            <div class="dialog-content">
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                    <table id="student-comments-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Record</th>
+                                <th>Created By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-comments-table-body">
+                            <!-- Comments will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="add-comment-btn">Add comment</button>
+                <button id="close-comments-btn">Close</button>
             </div>
         </div>
     </div>
@@ -322,6 +340,18 @@
             // Comment input validation
             const commentInput = document.getElementById('comment-input');
             commentInput.addEventListener('input', validateCommentInput);
+            
+            // View comments dialog buttons
+            const closeCommentsBtn = document.getElementById('close-comments-btn');
+            closeCommentsBtn.addEventListener('click', closeViewCommentsDialog);
+            
+            const addCommentBtn = document.getElementById('add-comment-btn');
+            addCommentBtn.addEventListener('click', () => {
+                // Close the view comments dialog
+                closeViewCommentsDialog();
+                // Open the add comment dialog
+                openCommentDialog();
+            });
             
             // Student table sorting
             const studentTableHeaders = document.querySelectorAll('#students-table th[data-sort]');
@@ -518,6 +548,11 @@
                 const hasDossierRecords = dossiers.some(dossier => dossier.studentID === student.id);
                 const dossierIcon = hasDossierRecords ? '&#128488;' : '';
                 
+                // Make the comment cell clickable if it has dossier records
+                const commentCellStyle = hasDossierRecords 
+                    ? 'text-align: center; font-size: 1.2em; cursor: pointer;' 
+                    : 'text-align: center; font-size: 1.2em;';
+                
                 row.innerHTML = `
                     <td><input type="checkbox" class="row-select" data-id="${student.id}"></td>
                     <td>${student.name}</td>
@@ -525,7 +560,7 @@
                     <td>${student.instructor}</td>
                     <td>${formattedBirthday}</td>
                     <td>${formattedStartDate}</td>
-                    <td style="text-align: center; font-size: 1.2em;" title="${hasDossierRecords ? 'Has dossier records' : 'No dossier records'}">${dossierIcon}</td>
+                    <td style="${commentCellStyle}" title="${hasDossierRecords ? 'Click to view comments' : 'No dossier records'}" data-id="${student.id}">${dossierIcon}</td>
                 `;
                 
                 studentsTableBody.appendChild(row);
@@ -535,6 +570,77 @@
             document.querySelectorAll('.row-select').forEach(checkbox => {
                 checkbox.addEventListener('change', updateSelectedRows);
             });
+            
+            // Add event listeners to comment cells with dossier records
+            document.querySelectorAll('#students-table-body td[data-id]').forEach(cell => {
+                const studentId = cell.getAttribute('data-id');
+                const hasDossierRecords = dossiers.some(dossier => dossier.studentID === studentId);
+                
+                if (hasDossierRecords) {
+                    cell.addEventListener('click', () => {
+                        openViewCommentsDialog(studentId);
+                    });
+                }
+            });
+        }
+        
+        // Open view comments dialog
+        function openViewCommentsDialog(studentId) {
+            // Find student
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            // Update dialog title with student name
+            const dialogTitle = document.querySelector('#view-comments-dialog .dialog-title');
+            dialogTitle.textContent = `Comments for ${student.name}`;
+            
+            // Filter dossiers for this student
+            const studentDossiers = dossiers.filter(dossier => dossier.studentID === studentId);
+            
+            // Sort by timestamp descending
+            studentDossiers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            // Display dossiers in the table
+            const tableBody = document.getElementById('student-comments-table-body');
+            tableBody.innerHTML = '';
+            
+            studentDossiers.forEach(dossier => {
+                const row = document.createElement('tr');
+                
+                // Format timestamp for display
+                const formattedTimestamp = dossier.timestamp ? new Date(dossier.timestamp).toLocaleString() : '';
+                
+                row.innerHTML = `
+                    <td>${formattedTimestamp}</td>
+                    <td>${dossier.record}</td>
+                    <td>${dossier.createdBy}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Store the student ID for the Add Comment button
+            document.getElementById('add-comment-btn').setAttribute('data-student-id', studentId);
+            
+            // Show dialog
+            document.getElementById('view-comments-dialog').style.display = 'flex';
+            
+            // Select the student row in the table
+            document.querySelectorAll('.row-select').forEach(checkbox => {
+                if (checkbox.getAttribute('data-id') === studentId) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
+            });
+            
+            // Update selected rows
+            updateSelectedRows();
+        }
+        
+        // Close view comments dialog
+        function closeViewCommentsDialog() {
+            document.getElementById('view-comments-dialog').style.display = 'none';
         }
         
         // Update selected rows array
