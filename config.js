@@ -1,5 +1,6 @@
 // Configuration settings
-
+// =============== !!! IMPORTANT !!! ===============
+// This file contains TEST environment keys. For the PROD switch to the CRM.env.js file with access to the PROD environment.
 // Airtable API configuration
 const config = {
     airtable: {
@@ -7,6 +8,9 @@ const config = {
         baseId: 'appTgYGpfTSWAPkLC',
         tables: {
             students: 'tblclIYLAoNfisfA4',  // Current table (renamed to be more descriptive)
+            dossiers: 'tblwTBz0MaLZcxwlb',
+            cost: 'tblZJDOPYzSDLbJp8',
+            payment: 'tbliYRWH2TeciIeZo',
             // Add additional tables here
             // For example:
             // courses: 'tblXXXXXXXXXXXX',
