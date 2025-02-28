@@ -84,6 +84,22 @@
             background-color: #ffff99; /* Light yellow */
         }
         
+        .filter-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .filter-table th, .filter-table td {
+            padding: 4px;
+            text-align: left;
+            border: none;
+        }
+        
+        .filter-table th {
+            font-weight: bold;
+            background-color: transparent;
+        }
+        
         .reserved-container {
             background-color: #ffcc66; /* Light orange */
             padding: 20px;
@@ -176,11 +192,11 @@
             <div class="filter-box instructor-filter">
                 <h3>Filter by instructor</h3>
                 <div class="checkbox-container select-all">
-                    <input type="checkbox" id="select-all-instructors" class="instructor-checkbox">
+                    <input type="checkbox" id="select-all-instructors" class="instructor-checkbox" checked>
                     <label for="select-all-instructors">Select all</label>
                 </div>
                 <div id="instructor-checkboxes">
-                    <!-- Will be populated dynamically -->
+                    <!-- Will be populated dynamically with a table -->
                 </div>
             </div>
             
@@ -188,30 +204,11 @@
             <div class="filter-box group-filter">
                 <h3>Filter by Group</h3>
                 <div class="checkbox-container select-all">
-                    <input type="checkbox" id="select-all-groups" class="group-checkbox">
+                    <input type="checkbox" id="select-all-groups" class="group-checkbox" checked>
                     <label for="select-all-groups">Select all</label>
                 </div>
                 <div id="group-checkboxes">
-                    <!-- Will be populated dynamically -->
-                </div>
-            </div>
-            
-            <!-- Dossier Records Container -->
-            <div class="reserved-container">
-                <h3>Student Dossier Records</h3>
-                <div class="table-container">
-                    <table id="dossier-table">
-                        <thead>
-                            <tr>
-                                <th data-sort="timestamp" class="timestamp-column">Timestamp</th>
-                                <th data-sort="studentName">Student Name</th>
-                                <th data-sort="record">Record</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dossier-table-body">
-                            <!-- Dossier data will be populated here -->
-                        </tbody>
-                    </table>
+                    <!-- Will be populated dynamically with a table -->
                 </div>
             </div>
         </div>
@@ -220,13 +217,17 @@
         <div class="filter-box active-filter">
             <h3>Active students</h3>
             <div class="radio-container">
-                <input type="radio" id="all-students" name="active-filter" value="all" checked>
+                <input type="radio" id="active-only" name="active-filter" value="active" checked>
+                <label for="active-only">Active</label>
+                
+                <input type="radio" id="non-active-only" name="active-filter" value="non-active">
+                <label for="non-active-only">Non active</label>
+                
+                <input type="radio" id="all-students" name="active-filter" value="all">
                 <label for="all-students">All</label>
                 
-                <input type="radio" id="active-only" name="active-filter" value="active">
-                <label for="active-only">Active only</label>
-                
                 <button id="create-comment-btn" disabled>Create comment</button>
+                <button id="clear-filters-btn">Clear filters</button>
             </div>
         </div>
         
@@ -362,15 +363,6 @@
                 });
             });
             
-            // Dossier table sorting
-            const dossierTableHeaders = document.querySelectorAll('#dossier-table th[data-sort]');
-            dossierTableHeaders.forEach(header => {
-                header.addEventListener('click', () => {
-                    const field = header.getAttribute('data-sort');
-                    sortDossiers(field);
-                });
-            });
-            
             // Select all rows checkbox
             const selectAllRows = document.getElementById('select-all-rows');
             selectAllRows.addEventListener('change', () => {
@@ -392,7 +384,9 @@
             selectAllInstructors.addEventListener('change', () => {
                 const checkboxes = document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors)');
                 checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllInstructors.checked;
+                    if (!checkbox.disabled) {
+                        checkbox.checked = selectAllInstructors.checked;
+                    }
                 });
                 filterStudentsByInstructor();
             });
@@ -402,10 +396,16 @@
             selectAllGroups.addEventListener('change', () => {
                 const checkboxes = document.querySelectorAll('.group-checkbox:not(#select-all-groups)');
                 checkboxes.forEach(checkbox => {
-                    checkbox.checked = selectAllGroups.checked;
+                    if (!checkbox.disabled) {
+                        checkbox.checked = selectAllGroups.checked;
+                    }
                 });
                 filterStudentsByGroup();
             });
+            
+            // Clear filters button
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
         }
         
         // Fetch students data from Airtable
@@ -465,14 +465,38 @@
         
         // Populate filter checkboxes
         function populateFilterCheckboxes() {
-            // Populate instructor checkboxes
-            const instructorCheckboxes = document.getElementById('instructor-checkboxes');
-            instructorCheckboxes.innerHTML = '';
-            
+            // Count students per instructor
+            const instructorCounts = {};
             instructors.forEach(instructor => {
-                const checkboxContainer = document.createElement('div');
-                checkboxContainer.className = 'checkbox-container';
+                instructorCounts[instructor] = students.filter(student => student.instructor === instructor).length;
+            });
+            
+            // Sort instructors by count descending
+            const sortedInstructors = [...instructors].sort((a, b) => instructorCounts[b] - instructorCounts[a]);
+            
+            // Populate instructor table
+            const instructorCheckboxes = document.getElementById('instructor-checkboxes');
+            instructorCheckboxes.innerHTML = `
+                <table class="filter-table">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Instructor</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="instructor-table-body">
+                    </tbody>
+                </table>
+            `;
+            
+            const instructorTableBody = document.getElementById('instructor-table-body');
+            
+            sortedInstructors.forEach(instructor => {
+                const row = document.createElement('tr');
                 
+                // Checkbox cell
+                const checkboxCell = document.createElement('td');
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `instructor-${instructor.replace(/\s+/g, '-')}`;
@@ -486,24 +510,60 @@
                     
                     filterStudentsByInstructor();
                 });
+                checkboxCell.appendChild(checkbox);
                 
+                // Instructor name cell
+                const nameCell = document.createElement('td');
                 const label = document.createElement('label');
                 label.htmlFor = checkbox.id;
                 label.textContent = instructor;
+                nameCell.appendChild(label);
                 
-                checkboxContainer.appendChild(checkbox);
-                checkboxContainer.appendChild(label);
-                instructorCheckboxes.appendChild(checkboxContainer);
+                // Count cell
+                const countCell = document.createElement('td');
+                countCell.textContent = instructorCounts[instructor];
+                
+                // Add cells to row
+                row.appendChild(checkboxCell);
+                row.appendChild(nameCell);
+                row.appendChild(countCell);
+                
+                // Add row to table
+                instructorTableBody.appendChild(row);
             });
             
-            // Populate group checkboxes
-            const groupCheckboxes = document.getElementById('group-checkboxes');
-            groupCheckboxes.innerHTML = '';
-            
+            // Count students per group
+            const groupCounts = {};
             groups.forEach(group => {
-                const checkboxContainer = document.createElement('div');
-                checkboxContainer.className = 'checkbox-container';
+                groupCounts[group] = students.filter(student => student.group === group).length;
+            });
+            
+            // Sort groups by count descending
+            const sortedGroups = [...groups].sort((a, b) => groupCounts[b] - groupCounts[a]);
+            
+            // Populate group table
+            const groupCheckboxes = document.getElementById('group-checkboxes');
+            groupCheckboxes.innerHTML = `
+                <table class="filter-table">
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            <th>Group</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody id="group-table-body">
+                    </tbody>
+                </table>
+            `;
+            
+            const groupTableBody = document.getElementById('group-table-body');
+            
+            sortedGroups.forEach(group => {
+                const row = document.createElement('tr');
                 
+                // Checkbox cell
+                const checkboxCell = document.createElement('td');
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `group-${group.replace(/\s+/g, '-')}`;
@@ -517,14 +577,26 @@
                     
                     filterStudentsByGroup();
                 });
+                checkboxCell.appendChild(checkbox);
                 
+                // Group name cell
+                const nameCell = document.createElement('td');
                 const label = document.createElement('label');
                 label.htmlFor = checkbox.id;
                 label.textContent = group;
+                nameCell.appendChild(label);
                 
-                checkboxContainer.appendChild(checkbox);
-                checkboxContainer.appendChild(label);
-                groupCheckboxes.appendChild(checkboxContainer);
+                // Count cell
+                const countCell = document.createElement('td');
+                countCell.textContent = groupCounts[group];
+                
+                // Add cells to row
+                row.appendChild(checkboxCell);
+                row.appendChild(nameCell);
+                row.appendChild(countCell);
+                
+                // Add row to table
+                groupTableBody.appendChild(row);
             });
         }
         
@@ -650,9 +722,6 @@
                 selectedRows.push(checkbox.getAttribute('data-id'));
             });
             console.log('Selected rows:', selectedRows);
-            
-            // Update dossier records based on selected students
-            filterDossiersBySelectedStudents();
             
             // Update create comment button state
             updateCreateCommentButtonState();
@@ -805,29 +874,21 @@
         // Filter students based on search input
         function filterStudents() {
             applyAllFilters();
-            // Update dossier records based on filtered students
-            filterDossiersByVisibleStudents();
         }
         
         // Filter students by active status
         function filterStudentsByActive() {
             applyAllFilters();
-            // Update dossier records based on filtered students
-            filterDossiersByVisibleStudents();
         }
         
         // Filter students by instructor
         function filterStudentsByInstructor() {
             applyAllFilters();
-            // Update dossier records based on filtered students
-            filterDossiersByVisibleStudents();
         }
         
         // Filter students by group
         function filterStudentsByGroup() {
             applyAllFilters();
-            // Update dossier records based on filtered students
-            filterDossiersByVisibleStudents();
         }
         
         // Apply all filters
@@ -853,7 +914,10 @@
                     student.instructor.toLowerCase().includes(searchTerm);
                 
                 // Active filter
-                const matchesActive = activeFilter === 'all' || (activeFilter === 'active' && student.active === true);
+                const matchesActive = 
+                    activeFilter === 'all' || 
+                    (activeFilter === 'active' && student.active === true) ||
+                    (activeFilter === 'non-active' && student.active !== true);
                 
                 // Instructor filter
                 const matchesInstructor = selectedInstructors.length === 0 || selectedInstructors.includes(student.instructor);
@@ -869,6 +933,149 @@
             
             // Display filtered students
             displayStudents(filtered);
+            
+            // Update filter counts based on cross-filtering
+            updateFilterCounts(filtered);
+        }
+        
+        // Clear all filters and reset to default state
+        function clearAllFilters() {
+            // Reset search input
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = '';
+            
+            // Reset active filter to "Active"
+            document.getElementById('active-only').checked = true;
+            
+            // Reset instructor checkboxes
+            document.getElementById('select-all-instructors').checked = true;
+            document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors)').forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.disabled = false;
+                // Make sure the row is visible
+                const row = checkbox.closest('tr');
+                if (row) {
+                    row.style.display = '';
+                }
+            });
+            
+            // Reset group checkboxes
+            document.getElementById('select-all-groups').checked = true;
+            document.querySelectorAll('.group-checkbox:not(#select-all-groups)').forEach(checkbox => {
+                checkbox.checked = true;
+                checkbox.disabled = false;
+                // Make sure the row is visible
+                const row = checkbox.closest('tr');
+                if (row) {
+                    row.style.display = '';
+                }
+            });
+            
+            // Apply filters to update the display
+            applyAllFilters();
+        }
+        
+        // Update filter counts based on current filtered students
+        function updateFilterCounts(filteredStudents) {
+            // Get current filter states
+            const activeFilter = document.querySelector('input[name="active-filter"]:checked').value;
+            const selectedInstructors = Array.from(document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors):checked')).map(checkbox => checkbox.value);
+            const selectedGroups = Array.from(document.querySelectorAll('.group-checkbox:not(#select-all-groups):checked')).map(checkbox => checkbox.value);
+            
+            // Update instructor counts
+            instructors.forEach(instructor => {
+                // For instructor counts, we need to apply group and active filters only
+                const instructorStudents = students.filter(student => {
+                    // Active filter
+                    const matchesActive = 
+                        activeFilter === 'all' || 
+                        (activeFilter === 'active' && student.active === true) ||
+                        (activeFilter === 'non-active' && student.active !== true);
+                    
+                    // Group filter
+                    const matchesGroup = selectedGroups.length === 0 || selectedGroups.includes(student.group);
+                    
+                    return student.instructor === instructor && matchesActive && matchesGroup;
+                });
+                
+                // Find the count cell for this instructor
+                const instructorRow = document.querySelector(`#instructor-${instructor.replace(/\s+/g, '-')}`).closest('tr');
+                if (instructorRow) {
+                    const countCell = instructorRow.cells[2];
+                    countCell.textContent = instructorStudents.length;
+                    
+                    // Hide row if count is 0, regardless of checkbox state
+                    const checkbox = instructorRow.cells[0].querySelector('input');
+                    if (instructorStudents.length === 0) {
+                        instructorRow.style.display = 'none';
+                        checkbox.disabled = true;
+                    } else {
+                        instructorRow.style.display = '';
+                        checkbox.disabled = false;
+                    }
+                }
+            });
+            
+            // Update "Select all" checkbox for instructors
+            updateSelectAllCheckbox('instructor');
+            
+            // Update group counts
+            groups.forEach(group => {
+                // For group counts, we need to apply instructor and active filters only
+                const groupStudents = students.filter(student => {
+                    // Active filter
+                    const matchesActive = 
+                        activeFilter === 'all' || 
+                        (activeFilter === 'active' && student.active === true) ||
+                        (activeFilter === 'non-active' && student.active !== true);
+                    
+                    // Instructor filter
+                    const matchesInstructor = selectedInstructors.length === 0 || selectedInstructors.includes(student.instructor);
+                    
+                    return student.group === group && matchesActive && matchesInstructor;
+                });
+                
+                // Find the count cell for this group
+                const groupRow = document.querySelector(`#group-${group.replace(/\s+/g, '-')}`).closest('tr');
+                if (groupRow) {
+                    const countCell = groupRow.cells[2];
+                    countCell.textContent = groupStudents.length;
+                    
+                    // Hide row if count is 0, regardless of checkbox state
+                    const checkbox = groupRow.cells[0].querySelector('input');
+                    if (groupStudents.length === 0) {
+                        groupRow.style.display = 'none';
+                        checkbox.disabled = true;
+                    } else {
+                        groupRow.style.display = '';
+                        checkbox.disabled = false;
+                    }
+                }
+            });
+            
+            // Update "Select all" checkbox for groups
+            updateSelectAllCheckbox('group');
+        }
+        
+        // Update "Select all" checkbox state based on visible checkboxes
+        function updateSelectAllCheckbox(type) {
+            if (type === 'instructor') {
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors)'))
+                    .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+                
+                const allChecked = visibleCheckboxes.length > 0 && 
+                    visibleCheckboxes.every(checkbox => checkbox.checked);
+                
+                document.getElementById('select-all-instructors').checked = allChecked;
+            } else if (type === 'group') {
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.group-checkbox:not(#select-all-groups)'))
+                    .filter(checkbox => checkbox.closest('tr').style.display !== 'none');
+                
+                const allChecked = visibleCheckboxes.length > 0 && 
+                    visibleCheckboxes.every(checkbox => checkbox.checked);
+                
+                document.getElementById('select-all-groups').checked = allChecked;
+            }
         }
         
         // Fetch dossier data from Airtable
@@ -902,10 +1109,7 @@
                 }));
                 
                 // Sort dossiers by timestamp descending by default
-                sortDossiers('timestamp');
-                
-                // Display dossiers
-                displayDossiers();
+                dossiers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 
                 // Update student table to show dossier indicators
                 if (students.length > 0) {
@@ -915,140 +1119,6 @@
                 console.error('Error fetching dossiers:', error);
                 // Show error message
             }
-        }
-        
-        // Display dossiers in the table
-        function displayDossiers(filteredDossiers = null) {
-            const dossiersToDisplay = filteredDossiers || dossiers;
-            
-            // Clear table
-            const dossierTableBody = document.getElementById('dossier-table-body');
-            dossierTableBody.innerHTML = '';
-            
-            // Add dossiers to table
-            dossiersToDisplay.forEach(dossier => {
-                const row = document.createElement('tr');
-                
-                // Find student name based on studentID
-                const student = students.find(s => s.id === dossier.studentID);
-                const studentName = student ? student.name : 'Unknown';
-                
-                // Format timestamp for display
-                const formattedTimestamp = dossier.timestamp ? new Date(dossier.timestamp).toLocaleString() : '';
-                
-                row.innerHTML = `
-                    <td>${formattedTimestamp}</td>
-                    <td>${studentName}</td>
-                    <td>${dossier.record}</td>
-                `;
-                
-                dossierTableBody.appendChild(row);
-            });
-        }
-        
-        // Sort dossiers by field
-        function sortDossiers(field) {
-            // Toggle sort direction if same field is clicked
-            if (dossierSort.field === field) {
-                dossierSort.direction = dossierSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                dossierSort.field = field;
-                // Default to descending for timestamp
-                dossierSort.direction = field === 'timestamp' ? 'desc' : 'asc';
-            }
-            
-            // Sort dossiers
-            dossiers.sort((a, b) => {
-                let valueA, valueB;
-                
-                // Special case for studentName (need to look up in students array)
-                if (field === 'studentName') {
-                    const studentA = students.find(s => s.id === a.studentID);
-                    const studentB = students.find(s => s.id === b.studentID);
-                    valueA = studentA ? studentA.name.toLowerCase() : '';
-                    valueB = studentB ? studentB.name.toLowerCase() : '';
-                } else {
-                    valueA = a[field];
-                    valueB = b[field];
-                    
-                    // Handle special cases for sorting
-                    if (field === 'timestamp') {
-                        valueA = new Date(valueA);
-                        valueB = new Date(valueB);
-                    } else if (typeof valueA === 'string') {
-                        valueA = valueA.toLowerCase();
-                        valueB = valueB.toLowerCase();
-                    }
-                }
-                
-                // Compare values
-                if (valueA < valueB) {
-                    return dossierSort.direction === 'asc' ? -1 : 1;
-                }
-                if (valueA > valueB) {
-                    return dossierSort.direction === 'asc' ? 1 : -1;
-                }
-                return 0;
-            });
-            
-            // Apply filter based on selected or visible students
-            if (selectedRows.length > 0) {
-                filterDossiersBySelectedStudents();
-            } else {
-                filterDossiersByVisibleStudents();
-            }
-            
-            // Update table headers
-            const tableHeaders = document.querySelectorAll('#dossier-table th[data-sort]');
-            tableHeaders.forEach(header => {
-                const headerField = header.getAttribute('data-sort');
-                if (headerField === field) {
-                    header.textContent = `${header.textContent.replace(' ▲', '').replace(' ▼', '')} ${dossierSort.direction === 'asc' ? '▲' : '▼'}`;
-                } else {
-                    header.textContent = header.textContent.replace(' ▲', '').replace(' ▼', '');
-                }
-            });
-        }
-        
-        // Filter dossiers by selected students
-        function filterDossiersBySelectedStudents() {
-            if (selectedRows.length === 0) {
-                // If no students selected, filter by visible students based on other filters
-                filterDossiersByVisibleStudents();
-                return;
-            }
-            
-            // Filter dossiers to only show those for selected students
-            const filtered = dossiers.filter(dossier => 
-                selectedRows.includes(dossier.studentID)
-            );
-            
-            displayDossiers(filtered);
-        }
-        
-        // Filter dossiers by visible students (after applying instructor/group filters)
-        function filterDossiersByVisibleStudents() {
-            // If there are selected rows, prioritize those
-            if (selectedRows.length > 0) {
-                filterDossiersBySelectedStudents();
-                return;
-            }
-            
-            // If all students are visible, show all dossiers
-            if (visibleStudents.length === students.length) {
-                displayDossiers();
-                return;
-            }
-            
-            // Get IDs of visible students
-            const visibleStudentIds = visibleStudents.map(student => student.id);
-            
-            // Filter dossiers to only show those for visible students
-            const filtered = dossiers.filter(dossier => 
-                visibleStudentIds.includes(dossier.studentID)
-            );
-            
-            displayDossiers(filtered);
         }
     </script>
 </body>
