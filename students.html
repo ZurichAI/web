@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta name="description" content="Student Management System">
+    <title>Student Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional styles for student management */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .student-management-header {
+            margin-bottom: 10px;
+        }
+        
+        .filters-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-box {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .instructor-filter, .group-filter {
+            background-color: #ffff99; /* Light yellow */
+        }
+        
+        .active-filter {
+            background-color: #ffff99; /* Light yellow */
+        }
+        
+        .reserved-container {
+            background-color: #ffcc66; /* Light orange */
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            min-height: 100px;
+            text-align: center;
+        }
+        
+        .search-container {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .checkbox-container {
+            margin-bottom: 5px;
+        }
+        
+        .radio-container {
+            margin-bottom: 5px;
+        }
+        
+        .side-containers {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .select-all {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        /* Checkbox styling for row selection */
+        .row-select {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Logo" style="height: 40px;">
+            <span>Home</span>
+        </a>
+        <nav>
+            <a href="about.html">About</a>
+            <a href="#">Our Services</a>
+            <a href="contact.html">Let's Talk</a>
+            <a href="instructor.html">Instructor Portal</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="student-management-header">
+            <h1>Student Management</h1>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search students...">
+        </div>
+        
+        <div class="filters-container">
+            <!-- Instructor Filter -->
+            <div class="filter-box instructor-filter">
+                <h3>Filter by instructor</h3>
+                <p>(check box with multiple selection, incl. "Select all")</p>
+                <div class="checkbox-container select-all">
+                    <input type="checkbox" id="select-all-instructors" class="instructor-checkbox">
+                    <label for="select-all-instructors">Select all</label>
+                </div>
+                <div id="instructor-checkboxes">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Group Filter -->
+            <div class="filter-box group-filter">
+                <h3>Filter by Group</h3>
+                <p>(check box with multiple selection, incl. "Select all")</p>
+                <div class="checkbox-container select-all">
+                    <input type="checkbox" id="select-all-groups" class="group-checkbox">
+                    <label for="select-all-groups">Select all</label>
+                </div>
+                <div id="group-checkboxes">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            
+            <!-- Reserved Container -->
+            <div class="reserved-container">
+                <h3>Reserved container for new functions (Stage 2)</h3>
+            </div>
+        </div>
+        
+        <!-- Active Filter (Radio Buttons) -->
+        <div class="filter-box active-filter">
+            <div class="radio-container">
+                <input type="radio" id="all-students" name="active-filter" value="all" checked>
+                <label for="all-students">All</label>
+                
+                <input type="radio" id="active-only" name="active-filter" value="active">
+                <label for="active-only">Active only</label>
+            </div>
+        </div>
+        
+        <!-- Students Table -->
+        <div id="students-table-container">
+            <table id="students-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30px;"><input type="checkbox" id="select-all-rows"></th>
+                        <th data-sort="name">Name</th>
+                        <th data-sort="group">Group</th>
+                        <th data-sort="instructor">Instructor</th>
+                        <th data-sort="birthday">Birthday</th>
+                        <th data-sort="startDate">Start Date</th>
+                    </tr>
+                </thead>
+                <tbody id="students-table-body">
+                    <!-- Student data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Side Containers for Stage 2 -->
+        <div class="side-containers">
+            <div class="reserved-container">
+                <h3>Reserved container for new functions (Stage 2)</h3>
+            </div>
+            
+            <div class="reserved-container">
+                <h3>Reserved container for new functions (Stage 2)</h3>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script>
+        // Global variables
+        let students = [];
+        let instructors = [];
+        let groups = [];
+        let currentSort = { field: 'name', direction: 'asc' };
+        let selectedRows = [];
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch students data
+            fetchStudents();
+            
+            // Initialize event listeners
+            initEventListeners();
+        });
+        
+        // Initialize event listeners
+        function initEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', filterStudents);
+            
+            // Table sorting
+            const tableHeaders = document.querySelectorAll('th[data-sort]');
+            tableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const field = header.getAttribute('data-sort');
+                    sortStudents(field);
+                });
+            });
+            
+            // Select all rows checkbox
+            const selectAllRows = document.getElementById('select-all-rows');
+            selectAllRows.addEventListener('change', () => {
+                const checkboxes = document.querySelectorAll('.row-select');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllRows.checked;
+                });
+                updateSelectedRows();
+            });
+            
+            // Active filter radio buttons
+            const activeFilterRadios = document.querySelectorAll('input[name="active-filter"]');
+            activeFilterRadios.forEach(radio => {
+                radio.addEventListener('change', filterStudentsByActive);
+            });
+            
+            // Select all instructors checkbox
+            const selectAllInstructors = document.getElementById('select-all-instructors');
+            selectAllInstructors.addEventListener('change', () => {
+                const checkboxes = document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors)');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllInstructors.checked;
+                });
+                filterStudentsByInstructor();
+            });
+            
+            // Select all groups checkbox
+            const selectAllGroups = document.getElementById('select-all-groups');
+            selectAllGroups.addEventListener('change', () => {
+                const checkboxes = document.querySelectorAll('.group-checkbox:not(#select-all-groups)');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllGroups.checked;
+                });
+                filterStudentsByGroup();
+            });
+        }
+        
+        // Fetch students data from Airtable
+        async function fetchStudents() {
+            try {
+                console.log('GET operation - Sending request...');
+                const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.students}`;
+                
+                const response = await fetch(airtableApiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${config.airtable.apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('GET operation - Response data:', data);
+                
+                // Format Airtable records to student objects
+                students = data.records.map(record => ({
+                    id: record.id,
+                    name: record.fields.Name || '',
+                    group: record.fields.Group || '',
+                    instructor: record.fields.Instructor || '',
+                    birthday: record.fields.Birthday || '',
+                    startDate: record.fields["Start Date"] || '',
+                    active: record.fields.Active === true
+                }));
+                
+                // Extract unique instructors and groups
+                extractUniqueValues();
+                
+                // Populate filter checkboxes
+                populateFilterCheckboxes();
+                
+                // Display students
+                displayStudents();
+            } catch (error) {
+                console.error('Error fetching students:', error);
+                // Show error message
+            }
+        }
+        
+        // Extract unique instructors and groups from students data
+        function extractUniqueValues() {
+            instructors = [...new Set(students.map(student => student.instructor))].filter(Boolean).sort();
+            groups = [...new Set(students.map(student => student.group))].filter(Boolean).sort();
+        }
+        
+        // Populate filter checkboxes
+        function populateFilterCheckboxes() {
+            // Populate instructor checkboxes
+            const instructorCheckboxes = document.getElementById('instructor-checkboxes');
+            instructorCheckboxes.innerHTML = '';
+            
+            instructors.forEach(instructor => {
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `instructor-${instructor.replace(/\s+/g, '-')}`;
+                checkbox.className = 'instructor-checkbox';
+                checkbox.value = instructor;
+                checkbox.checked = true;
+                checkbox.addEventListener('change', () => {
+                    // Update "Select all" checkbox
+                    const allChecked = document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors):checked').length === instructors.length;
+                    document.getElementById('select-all-instructors').checked = allChecked;
+                    
+                    filterStudentsByInstructor();
+                });
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = instructor;
+                
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(label);
+                instructorCheckboxes.appendChild(checkboxContainer);
+            });
+            
+            // Populate group checkboxes
+            const groupCheckboxes = document.getElementById('group-checkboxes');
+            groupCheckboxes.innerHTML = '';
+            
+            groups.forEach(group => {
+                const checkboxContainer = document.createElement('div');
+                checkboxContainer.className = 'checkbox-container';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = `group-${group.replace(/\s+/g, '-')}`;
+                checkbox.className = 'group-checkbox';
+                checkbox.value = group;
+                checkbox.checked = true;
+                checkbox.addEventListener('change', () => {
+                    // Update "Select all" checkbox
+                    const allChecked = document.querySelectorAll('.group-checkbox:not(#select-all-groups):checked').length === groups.length;
+                    document.getElementById('select-all-groups').checked = allChecked;
+                    
+                    filterStudentsByGroup();
+                });
+                
+                const label = document.createElement('label');
+                label.htmlFor = checkbox.id;
+                label.textContent = group;
+                
+                checkboxContainer.appendChild(checkbox);
+                checkboxContainer.appendChild(label);
+                groupCheckboxes.appendChild(checkboxContainer);
+            });
+        }
+        
+        // Display students in the table
+        function displayStudents(filteredStudents = null) {
+            const studentsToDisplay = filteredStudents || students;
+            
+            // Clear table
+            const studentsTableBody = document.getElementById('students-table-body');
+            studentsTableBody.innerHTML = '';
+            
+            // Add students to table
+            studentsToDisplay.forEach(student => {
+                const row = document.createElement('tr');
+                
+                // Format dates for display
+                const formattedBirthday = new Date(student.birthday).toLocaleDateString();
+                const formattedStartDate = new Date(student.startDate).toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td><input type="checkbox" class="row-select" data-id="${student.id}"></td>
+                    <td>${student.name}</td>
+                    <td>${student.group}</td>
+                    <td>${student.instructor}</td>
+                    <td>${formattedBirthday}</td>
+                    <td>${formattedStartDate}</td>
+                `;
+                
+                studentsTableBody.appendChild(row);
+            });
+            
+            // Add event listeners to row checkboxes
+            document.querySelectorAll('.row-select').forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedRows);
+            });
+        }
+        
+        // Update selected rows array
+        function updateSelectedRows() {
+            selectedRows = [];
+            document.querySelectorAll('.row-select:checked').forEach(checkbox => {
+                selectedRows.push(checkbox.getAttribute('data-id'));
+            });
+            console.log('Selected rows:', selectedRows);
+        }
+        
+        // Sort students by field
+        function sortStudents(field) {
+            // Toggle sort direction if same field is clicked
+            if (currentSort.field === field) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.field = field;
+                currentSort.direction = 'asc';
+            }
+            
+            // Sort students
+            students.sort((a, b) => {
+                let valueA = a[field];
+                let valueB = b[field];
+                
+                // Handle special cases for sorting
+                if (field === 'birthday' || field === 'startDate') {
+                    valueA = new Date(valueA);
+                    valueB = new Date(valueB);
+                } else if (typeof valueA === 'string') {
+                    valueA = valueA.toLowerCase();
+                    valueB = valueB.toLowerCase();
+                }
+                
+                // Compare values
+                if (valueA < valueB) {
+                    return currentSort.direction === 'asc' ? -1 : 1;
+                }
+                if (valueA > valueB) {
+                    return currentSort.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            // Apply all filters
+            applyAllFilters();
+            
+            // Update table headers
+            const tableHeaders = document.querySelectorAll('th[data-sort]');
+            tableHeaders.forEach(header => {
+                const headerField = header.getAttribute('data-sort');
+                if (headerField === field) {
+                    header.textContent = `${header.textContent.replace(' ▲', '').replace(' ▼', '')} ${currentSort.direction === 'asc' ? '▲' : '▼'}`;
+                } else {
+                    header.textContent = header.textContent.replace(' ▲', '').replace(' ▼', '');
+                }
+            });
+        }
+        
+        // Filter students based on search input
+        function filterStudents() {
+            applyAllFilters();
+        }
+        
+        // Filter students by active status
+        function filterStudentsByActive() {
+            applyAllFilters();
+        }
+        
+        // Filter students by instructor
+        function filterStudentsByInstructor() {
+            applyAllFilters();
+        }
+        
+        // Filter students by group
+        function filterStudentsByGroup() {
+            applyAllFilters();
+        }
+        
+        // Apply all filters
+        function applyAllFilters() {
+            // Get search term
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            // Get active filter value
+            const activeFilter = document.querySelector('input[name="active-filter"]:checked').value;
+            
+            // Get selected instructors
+            const selectedInstructors = Array.from(document.querySelectorAll('.instructor-checkbox:not(#select-all-instructors):checked')).map(checkbox => checkbox.value);
+            
+            // Get selected groups
+            const selectedGroups = Array.from(document.querySelectorAll('.group-checkbox:not(#select-all-groups):checked')).map(checkbox => checkbox.value);
+            
+            // Apply filters
+            const filtered = students.filter(student => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    student.name.toLowerCase().includes(searchTerm) ||
+                    student.group.toLowerCase().includes(searchTerm) ||
+                    student.instructor.toLowerCase().includes(searchTerm);
+                
+                // Active filter
+                const matchesActive = activeFilter === 'all' || (activeFilter === 'active' && student.active);
+                
+                // Instructor filter
+                const matchesInstructor = selectedInstructors.length === 0 || selectedInstructors.includes(student.instructor);
+                
+                // Group filter
+                const matchesGroup = selectedGroups.length === 0 || selectedGroups.includes(student.group);
+                
+                return matchesSearch && matchesActive && matchesInstructor && matchesGroup;
+            });
+            
+            // Display filtered students
+            displayStudents(filtered);
+        }
+    </script>
+</body>
+</html>
