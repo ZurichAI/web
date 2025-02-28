@@ -12,7 +12,52 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 10px;
+        }
+        
+        /* Dialog styles */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .dialog-box {
+            background-color: white;
             padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .dialog-content {
+            margin-bottom: 20px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
         
         .student-management-header {
@@ -55,7 +100,7 @@
         }
         
         table {
-            width: 100%;
+            width: 70%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
@@ -122,17 +167,15 @@
     <div class="container">
         <div class="student-management-header">
             <h1>Student Management</h1>
-        </div>
-        
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search students...">
+            <div class="search-container">
+                <input type="search" id="search-input" placeholder="Search students...">
+            </div>
         </div>
         
         <div class="filters-container">
             <!-- Instructor Filter -->
             <div class="filter-box instructor-filter">
                 <h3>Filter by instructor</h3>
-                <p>(check box with multiple selection, incl. "Select all")</p>
                 <div class="checkbox-container select-all">
                     <input type="checkbox" id="select-all-instructors" class="instructor-checkbox">
                     <label for="select-all-instructors">Select all</label>
@@ -145,7 +188,6 @@
             <!-- Group Filter -->
             <div class="filter-box group-filter">
                 <h3>Filter by Group</h3>
-                <p>(check box with multiple selection, incl. "Select all")</p>
                 <div class="checkbox-container select-all">
                     <input type="checkbox" id="select-all-groups" class="group-checkbox">
                     <label for="select-all-groups">Select all</label>
@@ -155,50 +197,84 @@
                 </div>
             </div>
             
-            <!-- Reserved Container -->
+            <!-- Dossier Records Container -->
             <div class="reserved-container">
-                <h3>Reserved container for new functions (Stage 2)</h3>
+                <h3>Student Dossier Records</h3>
+                <div class="table-container">
+                    <table id="dossier-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="timestamp" class="timestamp-column">Timestamp</th>
+                                <th data-sort="studentName">Student Name</th>
+                                <th data-sort="record">Record</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dossier-table-body">
+                            <!-- Dossier data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         
         <!-- Active Filter (Radio Buttons) -->
         <div class="filter-box active-filter">
+            <h3>Active students</h3>
             <div class="radio-container">
                 <input type="radio" id="all-students" name="active-filter" value="all" checked>
                 <label for="all-students">All</label>
                 
                 <input type="radio" id="active-only" name="active-filter" value="active">
                 <label for="active-only">Active only</label>
+                
+                <button id="create-comment-btn" disabled>Create comment</button>
             </div>
         </div>
         
-        <!-- Students Table -->
-        <div id="students-table-container">
-            <table id="students-table">
-                <thead>
-                    <tr>
-                        <th style="width: 30px;"><input type="checkbox" id="select-all-rows"></th>
-                        <th data-sort="name">Name</th>
-                        <th data-sort="group">Group</th>
-                        <th data-sort="instructor">Instructor</th>
-                        <th data-sort="birthday">Birthday</th>
-                        <th data-sort="startDate">Start Date</th>
-                    </tr>
-                </thead>
-                <tbody id="students-table-body">
-                    <!-- Student data will be populated here -->
-                </tbody>
-            </table>
-        </div>
-        
-        <!-- Side Containers for Stage 2 -->
-        <div class="side-containers">
-            <div class="reserved-container">
-                <h3>Reserved container for new functions (Stage 2)</h3>
+        <div class="main-content">
+            <!-- Students Table -->
+            <div class="table-container">
+                <table id="students-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;"><input type="checkbox" id="select-all-rows"></th>
+                            <th data-sort="name">Name</th>
+                            <th data-sort="group">Group</th>
+                            <th data-sort="instructor">Instructor</th>
+                            <th data-sort="birthday">Birthday</th>
+                            <th data-sort="startDate">Start Date</th>
+                            <th style="width: 40px;" title="Has dossier records">Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-table-body">
+                        <!-- Student data will be populated here -->
+                    </tbody>
+                </table>
             </div>
             
-            <div class="reserved-container">
-                <h3>Reserved container for new functions (Stage 2)</h3>
+            <!-- Side Containers for Stage 2 -->
+            <div class="side-containers">
+                <div class="reserved-container">
+                    <h3>Reserved container 2 for new functions (Stage 2)</h3>
+                </div>
+                
+                <div class="reserved-container">
+                    <h3>Reserved container 3 for new functions (Stage 2)</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for adding comments -->
+    <div class="dialog-overlay" id="comment-dialog">
+        <div class="dialog-box">
+            <h3 class="dialog-title">Add a comment</h3>
+            <div class="dialog-content">
+                <textarea class="dialog-input" id="comment-input" placeholder="Add a comment"></textarea>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-comment-btn">Cancel</button>
+                <button id="save-comment-btn" disabled>Save</button>
             </div>
         </div>
     </div>
@@ -209,13 +285,19 @@
         let students = [];
         let instructors = [];
         let groups = [];
+        let dossiers = [];
         let currentSort = { field: 'name', direction: 'asc' };
+        let dossierSort = { field: 'timestamp', direction: 'desc' };
         let selectedRows = [];
+        let visibleStudents = []; // Store currently visible students after filtering
         
         // Initialize the page
         document.addEventListener('DOMContentLoaded', () => {
             // Fetch students data
             fetchStudents();
+            
+            // Fetch dossier data
+            fetchDossiers();
             
             // Initialize event listeners
             initEventListeners();
@@ -227,12 +309,36 @@
             const searchInput = document.getElementById('search-input');
             searchInput.addEventListener('input', filterStudents);
             
-            // Table sorting
-            const tableHeaders = document.querySelectorAll('th[data-sort]');
-            tableHeaders.forEach(header => {
+            // Comment button functionality
+            const createCommentBtn = document.getElementById('create-comment-btn');
+            createCommentBtn.addEventListener('click', openCommentDialog);
+            
+            // Comment dialog buttons
+            const cancelCommentBtn = document.getElementById('cancel-comment-btn');
+            cancelCommentBtn.addEventListener('click', closeCommentDialog);
+            
+            const saveCommentBtn = document.getElementById('save-comment-btn');
+            saveCommentBtn.addEventListener('click', saveComment);
+            
+            // Comment input validation
+            const commentInput = document.getElementById('comment-input');
+            commentInput.addEventListener('input', validateCommentInput);
+            
+            // Student table sorting
+            const studentTableHeaders = document.querySelectorAll('#students-table th[data-sort]');
+            studentTableHeaders.forEach(header => {
                 header.addEventListener('click', () => {
                     const field = header.getAttribute('data-sort');
                     sortStudents(field);
+                });
+            });
+            
+            // Dossier table sorting
+            const dossierTableHeaders = document.querySelectorAll('#dossier-table th[data-sort]');
+            dossierTableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const field = header.getAttribute('data-sort');
+                    sortDossiers(field);
                 });
             });
             
@@ -304,6 +410,9 @@
                     startDate: record.fields["Start Date"] || '',
                     active: record.fields.Active === true
                 }));
+                
+                // Initialize visibleStudents with all students
+                visibleStudents = [...students];
                 
                 // Extract unique instructors and groups
                 extractUniqueValues();
@@ -406,6 +515,10 @@
                 const formattedBirthday = new Date(student.birthday).toLocaleDateString();
                 const formattedStartDate = new Date(student.startDate).toLocaleDateString();
                 
+                // Check if student has dossier records
+                const hasDossierRecords = dossiers.some(dossier => dossier.studentID === student.id);
+                const dossierIcon = hasDossierRecords ? '&#128488;' : '';
+                
                 row.innerHTML = `
                     <td><input type="checkbox" class="row-select" data-id="${student.id}"></td>
                     <td>${student.name}</td>
@@ -413,6 +526,7 @@
                     <td>${student.instructor}</td>
                     <td>${formattedBirthday}</td>
                     <td>${formattedStartDate}</td>
+                    <td style="text-align: center; font-size: 1.2em;" title="${hasDossierRecords ? 'Has dossier records' : 'No dossier records'}">${dossierIcon}</td>
                 `;
                 
                 studentsTableBody.appendChild(row);
@@ -431,6 +545,107 @@
                 selectedRows.push(checkbox.getAttribute('data-id'));
             });
             console.log('Selected rows:', selectedRows);
+            
+            // Update dossier records based on selected students
+            filterDossiersBySelectedStudents();
+            
+            // Update create comment button state
+            updateCreateCommentButtonState();
+        }
+        
+        // Update create comment button state based on selection
+        function updateCreateCommentButtonState() {
+            const createCommentBtn = document.getElementById('create-comment-btn');
+            createCommentBtn.disabled = selectedRows.length !== 1;
+        }
+        
+        // Open comment dialog
+        function openCommentDialog() {
+            if (selectedRows.length !== 1) {
+                return; // Only proceed if exactly one student is selected
+            }
+            
+            // Clear previous input
+            document.getElementById('comment-input').value = '';
+            
+            // Disable save button initially
+            document.getElementById('save-comment-btn').disabled = true;
+            
+            // Show dialog
+            document.getElementById('comment-dialog').style.display = 'flex';
+        }
+        
+        // Close comment dialog
+        function closeCommentDialog() {
+            document.getElementById('comment-dialog').style.display = 'none';
+        }
+        
+        // Validate comment input
+        function validateCommentInput() {
+            const commentInput = document.getElementById('comment-input');
+            const saveCommentBtn = document.getElementById('save-comment-btn');
+            
+            // Enable save button only if input is not empty
+            saveCommentBtn.disabled = commentInput.value.trim() === '';
+        }
+        
+        // Save comment to Airtable
+        async function saveComment() {
+            if (selectedRows.length !== 1) {
+                return; // Only proceed if exactly one student is selected
+            }
+            
+            const studentId = selectedRows[0];
+            const commentText = document.getElementById('comment-input').value.trim();
+            
+            if (commentText === '') {
+                return; // Don't save empty comments
+            }
+            
+            try {
+                // Find student name for notification
+                const student = students.find(s => s.id === studentId);
+                const studentName = student ? student.name : 'Unknown';
+                
+                // Prepare record data
+                const recordData = {
+                    fields: {
+                        Record: commentText,
+                        studentID: studentId,
+                        'Created By': 'Instructor 1',
+                        Timestamp: new Date().toISOString()
+                    }
+                };
+                
+                // Send POST request to Airtable
+                const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.dossiers}`;
+                
+                const response = await fetch(airtableApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${config.airtable.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(recordData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                }
+                
+                // Close dialog
+                closeCommentDialog();
+                
+                // Show notification
+                alert(`The comment to the student ${studentName} added`);
+                
+                // Refresh dossier data
+                fetchDossiers();
+                
+            } catch (error) {
+                console.error('Error saving comment:', error);
+                alert('Error saving comment. Please try again.');
+            }
         }
         
         // Sort students by field
@@ -471,7 +686,7 @@
             applyAllFilters();
             
             // Update table headers
-            const tableHeaders = document.querySelectorAll('th[data-sort]');
+            const tableHeaders = document.querySelectorAll('#students-table th[data-sort]');
             tableHeaders.forEach(header => {
                 const headerField = header.getAttribute('data-sort');
                 if (headerField === field) {
@@ -485,21 +700,29 @@
         // Filter students based on search input
         function filterStudents() {
             applyAllFilters();
+            // Update dossier records based on filtered students
+            filterDossiersByVisibleStudents();
         }
         
         // Filter students by active status
         function filterStudentsByActive() {
             applyAllFilters();
+            // Update dossier records based on filtered students
+            filterDossiersByVisibleStudents();
         }
         
         // Filter students by instructor
         function filterStudentsByInstructor() {
             applyAllFilters();
+            // Update dossier records based on filtered students
+            filterDossiersByVisibleStudents();
         }
         
         // Filter students by group
         function filterStudentsByGroup() {
             applyAllFilters();
+            // Update dossier records based on filtered students
+            filterDossiersByVisibleStudents();
         }
         
         // Apply all filters
@@ -525,7 +748,7 @@
                     student.instructor.toLowerCase().includes(searchTerm);
                 
                 // Active filter
-                const matchesActive = activeFilter === 'all' || (activeFilter === 'active' && student.active);
+                const matchesActive = activeFilter === 'all' || (activeFilter === 'active' && student.active === true);
                 
                 // Instructor filter
                 const matchesInstructor = selectedInstructors.length === 0 || selectedInstructors.includes(student.instructor);
@@ -536,8 +759,191 @@
                 return matchesSearch && matchesActive && matchesInstructor && matchesGroup;
             });
             
+            // Store the filtered students for dossier filtering
+            visibleStudents = filtered;
+            
             // Display filtered students
             displayStudents(filtered);
+        }
+        
+        // Fetch dossier data from Airtable
+        async function fetchDossiers() {
+            try {
+                console.log('GET operation - Sending dossier request...');
+                const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.dossiers}`;
+                
+                const response = await fetch(airtableApiUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${config.airtable.apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('GET operation - Dossier response data:', data);
+                
+                // Format Airtable records to dossier objects
+                dossiers = data.records.map(record => ({
+                    id: record.id,
+                    timestamp: record.fields.Timestamp || '',
+                    studentID: record.fields.studentID || '',
+                    createdBy: record.fields['Created By'] || '',
+                    record: record.fields.Record || ''
+                }));
+                
+                // Sort dossiers by timestamp descending by default
+                sortDossiers('timestamp');
+                
+                // Display dossiers
+                displayDossiers();
+                
+                // Update student table to show dossier indicators
+                if (students.length > 0) {
+                    displayStudents(visibleStudents.length > 0 ? visibleStudents : students);
+                }
+            } catch (error) {
+                console.error('Error fetching dossiers:', error);
+                // Show error message
+            }
+        }
+        
+        // Display dossiers in the table
+        function displayDossiers(filteredDossiers = null) {
+            const dossiersToDisplay = filteredDossiers || dossiers;
+            
+            // Clear table
+            const dossierTableBody = document.getElementById('dossier-table-body');
+            dossierTableBody.innerHTML = '';
+            
+            // Add dossiers to table
+            dossiersToDisplay.forEach(dossier => {
+                const row = document.createElement('tr');
+                
+                // Find student name based on studentID
+                const student = students.find(s => s.id === dossier.studentID);
+                const studentName = student ? student.name : 'Unknown';
+                
+                // Format timestamp for display
+                const formattedTimestamp = dossier.timestamp ? new Date(dossier.timestamp).toLocaleString() : '';
+                
+                row.innerHTML = `
+                    <td>${formattedTimestamp}</td>
+                    <td>${studentName}</td>
+                    <td>${dossier.record}</td>
+                `;
+                
+                dossierTableBody.appendChild(row);
+            });
+        }
+        
+        // Sort dossiers by field
+        function sortDossiers(field) {
+            // Toggle sort direction if same field is clicked
+            if (dossierSort.field === field) {
+                dossierSort.direction = dossierSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                dossierSort.field = field;
+                // Default to descending for timestamp
+                dossierSort.direction = field === 'timestamp' ? 'desc' : 'asc';
+            }
+            
+            // Sort dossiers
+            dossiers.sort((a, b) => {
+                let valueA, valueB;
+                
+                // Special case for studentName (need to look up in students array)
+                if (field === 'studentName') {
+                    const studentA = students.find(s => s.id === a.studentID);
+                    const studentB = students.find(s => s.id === b.studentID);
+                    valueA = studentA ? studentA.name.toLowerCase() : '';
+                    valueB = studentB ? studentB.name.toLowerCase() : '';
+                } else {
+                    valueA = a[field];
+                    valueB = b[field];
+                    
+                    // Handle special cases for sorting
+                    if (field === 'timestamp') {
+                        valueA = new Date(valueA);
+                        valueB = new Date(valueB);
+                    } else if (typeof valueA === 'string') {
+                        valueA = valueA.toLowerCase();
+                        valueB = valueB.toLowerCase();
+                    }
+                }
+                
+                // Compare values
+                if (valueA < valueB) {
+                    return dossierSort.direction === 'asc' ? -1 : 1;
+                }
+                if (valueA > valueB) {
+                    return dossierSort.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            // Apply filter based on selected or visible students
+            if (selectedRows.length > 0) {
+                filterDossiersBySelectedStudents();
+            } else {
+                filterDossiersByVisibleStudents();
+            }
+            
+            // Update table headers
+            const tableHeaders = document.querySelectorAll('#dossier-table th[data-sort]');
+            tableHeaders.forEach(header => {
+                const headerField = header.getAttribute('data-sort');
+                if (headerField === field) {
+                    header.textContent = `${header.textContent.replace(' ▲', '').replace(' ▼', '')} ${dossierSort.direction === 'asc' ? '▲' : '▼'}`;
+                } else {
+                    header.textContent = header.textContent.replace(' ▲', '').replace(' ▼', '');
+                }
+            });
+        }
+        
+        // Filter dossiers by selected students
+        function filterDossiersBySelectedStudents() {
+            if (selectedRows.length === 0) {
+                // If no students selected, filter by visible students based on other filters
+                filterDossiersByVisibleStudents();
+                return;
+            }
+            
+            // Filter dossiers to only show those for selected students
+            const filtered = dossiers.filter(dossier => 
+                selectedRows.includes(dossier.studentID)
+            );
+            
+            displayDossiers(filtered);
+        }
+        
+        // Filter dossiers by visible students (after applying instructor/group filters)
+        function filterDossiersByVisibleStudents() {
+            // If there are selected rows, prioritize those
+            if (selectedRows.length > 0) {
+                filterDossiersBySelectedStudents();
+                return;
+            }
+            
+            // If all students are visible, show all dossiers
+            if (visibleStudents.length === students.length) {
+                displayDossiers();
+                return;
+            }
+            
+            // Get IDs of visible students
+            const visibleStudentIds = visibleStudents.map(student => student.id);
+            
+            // Filter dossiers to only show those for visible students
+            const filtered = dossiers.filter(dossier => 
+                visibleStudentIds.includes(dossier.studentID)
+            );
+            
+            displayDossiers(filtered);
         }
     </script>
 </body>
