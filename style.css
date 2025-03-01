@@ -90,7 +90,7 @@ body {
     justify-content: space-between; /* Раздвигаем элементы по краям */
     align-items: center; /* Выравниваем элементы по высоте */
     width: 100%; /* Делаем ширину 100% */
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 #search-input {
     width: 250px;  /* Fixed width to match the image */
@@ -103,66 +103,23 @@ body {
 
 /* Additional styles for student management page to match the image */
 .container {
-    max-width: 100%;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 10px 20px;
     background-color: whitesmoke;
     border: 1px solid #ccc;
 }
 
-.filters-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 2fr;
-    gap: 10px;
-    margin-bottom: 5px;
-}
-
-.filter-box {
-    padding: 10px;
-    border: 1px solid #000;
-    border-radius: 0;
-}
-
-.instructor-filter, .group-filter {
-    background-color: #ffffcc; /* Lighter yellow */
-    height: auto;
-    min-height: 60px;
-    padding-bottom: 5px;
-}
-
-.active-filter {
-    background-color: #ffffcc; /* Lighter yellow */
-    width: 250px;
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #000;
-}
-
-.reserved-container {
-    background-color: #f5c878; /* Adjusted orange to match image */
-    padding: 20px;
-    border: 1px solid #000;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 150px;
-}
 
 .search-container {
     text-align: right;
     margin-bottom: 10px;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    border: 1px solid #000;
-}
+
 
 table, th, td {
-    border: 1px solid #000;
+    border: 1px solid #ddd;
 }
 
 th, td {
@@ -172,6 +129,7 @@ th, td {
 
 th {
     background-color: #f2f2f2;
+    cursor: pointer;
     position: relative;
 }
 
@@ -201,13 +159,6 @@ tr:nth-child(even) {
     margin-right: 5px;
 }
 
-.side-containers {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    float: right;
-    width: 25%;
-}
 
 .main-content {
     display: flex;
