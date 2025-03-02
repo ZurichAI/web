@@ -1,2 +1,99 @@
-# Missing Functionality and Recommendations for payments.html and payments.js
+# Bug Fix: Comment Save Functionality Not Working
 
+## Problem Description
+When clicking "Save" in the 'Add a comment' dialog box, the following error occurs in the console:
+```
+payments.js:483 Uncaught TypeError: cost.notes.push is not a function
+    at HTMLButtonElement.saveComment (payments.js:483:16)
+```
+
+## Root Cause
+The issue is in the `saveComment` function in the payments.js file. The function attempts to use `cost.notes.push()` to add a new comment, but `cost.notes` is not an array - it's a string or undefined. 
+
+Looking at the code:
+1. In the `fetchCosts` function, `cost.notes` is initialized as `record.fields.Notes || []`
+2. However, the data from Airtable actually stores notes as a string, not an array
+3. When trying to add a comment with `cost.notes.push()`, it fails because strings don't have a push method
+
+## Solution
+
+The solution is to modify the `saveComment` function to handle `cost.notes` as a string rather than an array.
+
+### Step-by-Step Instructions:
+
+1. Open the `payments.js` file.
+
+2. Find the `saveComment` function (around line 480).
+
+3. Replace the code that adds a new comment with the following code:
+
+```javascript
+// Update the cost record with the comment
+const commentText = document.getElementById('comment-input').value.trim();
+
+if (commentText === '') {
+    alert('Please enter a comment.');
+    return;
+}
+
+// If there was an existing note, append the new comment to it
+if (typeof cost.notes === 'string' && cost.notes.trim() !== '') {
+    cost.notes = `${cost.notes}\n\n${new Date().toLocaleString()} - ${commentText}`;
+} else {
+    // If no existing note, create a new one
+    cost.notes = `${new Date().toLocaleString()} - ${commentText}`;
+}
+    
+// In a real implementation, this would send a request to Airtable
+// For now, we'll just simulate it
+console.log(`Saving comment for cost ${costId}: ${commentText}`);
+    
+// Close dialog
+closeCommentDialog();
+    
+// Show notification
+alert(`Comment added to the cost record for ${cost.studentName}`);
+    
+// Refresh the display
+applyAllFilters();
+```
+
+4. Additionally, to ensure comments display correctly, find the `openViewCommentsDialog` function and update the code that displays comments:
+
+```javascript
+// Display comments in the table
+const tableBody = document.getElementById('comments-table-body');
+tableBody.innerHTML = '';
+
+// Handle the case where notes is a string
+if (typeof cost.notes === 'string' && cost.notes.trim() !== '') {
+    // If notes is a non-empty string, create a single comment entry
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${formatDate(cost.date)}</td>
+        <td>${cost.notes}</td>
+        <td>System</td>
+    `;
+    tableBody.appendChild(row);
+} else {
+    // If notes is empty or not a string
+    const row = document.createElement('tr');
+    row.innerHTML = '<td colspan="3">No comments available</td>';
+    tableBody.appendChild(row);
+}
+```
+
+## Explanation
+
+This solution addresses the bug by:
+
+1. Removing the problematic `cost.notes.push()` call that was causing the error
+2. Treating `cost.notes` as a string instead of an array
+3. When adding a new comment, it either creates a new string or appends to the existing string
+4. When displaying comments, it properly handles the string format of the notes
+
+The key insight is that the application was designed to store notes as a string, but some parts of the code were trying to treat it as an array. This solution ensures consistent handling of the notes as strings throughout the application.
+    cost.notes = `${cost.notes}\n\n${new Date().toLocaleString()} - ${commentText}`;
+} else {
+    // If no existing note, create a new one
+    cost.notes = `${new Date().toLocaleString()} - ${commentText}`;

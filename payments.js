@@ -12,6 +12,26 @@ let visibleCosts = [];
 let visiblePayments = [];
 let studentNames = []; // For student name filter
 
+// Helper function to format date as dd.mm.yyyy
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+        console.error('Invalid date:', dateString);
+        return '';
+    }
+    
+    // Format as dd.mm.yyyy
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    
+    return `${day}.${month}.${year}`;
+}
+
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     // Set default date for cost and payment creation
@@ -432,39 +452,94 @@ function saveComment() {
     
     const costId = selectedCostRows[0];
     const cost = costs.find(c => c.id === costId);
+    console.log('Selected row ${costId}');
     
     if (!cost) {
         alert('Selected cost record not found.');
         return;
     }
     
-    const commentText = document.getElementById('comment-input').value.trim();
+// Update the cost record with the comment
+const commentText = document.getElementById('comment-input').value.trim();
+
+if (commentText === '') {
+    alert('Please enter a comment.');
+    return;
+}
+
+// If there was an existing note, append the new comment to it
+if (typeof cost.notes === 'string' && cost.notes.trim() !== '') {
+    cost.notes = `${cost.notes}\n\n${commentText}`;
+} else {
+    // If no existing note, create a new one
+    cost.notes = ` ${commentText}`;
+}
     
-    if (commentText === '') {
-        alert('Please enter a comment.');
-        return;
+// Send the updated notes to Airtable
+const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.cost}/${costId}`;
+
+// Show loading indicator or disable the save button
+document.getElementById('save-comment-btn').disabled = true;
+document.getElementById('save-comment-btn').textContent = 'Saving...';
+
+// Prepare the data for Airtable
+const updateData = {
+    fields: {
+        Notes: cost.notes
     }
-    
-    // In a real implementation, this would send a request to Airtable
-    // For now, we'll just simulate it
-    console.log(`Saving comment for cost ${costId}: ${commentText}`);
-    
-    // Update the cost record with the comment
-    cost.notes = cost.notes || [];
-    cost.notes.push({
-        timestamp: new Date().toISOString(),
-        text: commentText,
-        createdBy: 'Current User'
-    });
+};
+
+// Make the API call to update the record
+fetch(airtableApiUrl, {
+    method: 'PATCH',
+    headers: {
+        'Authorization': `Bearer ${config.airtable.apiKey}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(updateData)
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+})
+.then(data => {
+    console.log('Comment saved successfully:', data);
     
     // Close dialog
     closeCommentDialog();
     
-    // Show notification
+    // Show success notification
     alert(`Comment added to the cost record for ${cost.studentName}`);
     
     // Refresh the display
     applyAllFilters();
+})
+.catch(error => {
+    console.error('Error saving comment:', error);
+    alert(`Error saving comment: ${error.message}`);
+    
+    // Re-enable the save button
+    document.getElementById('save-comment-btn').disabled = false;
+    document.getElementById('save-comment-btn').textContent = 'Save';
+})
+.finally(() => {
+    // Reset button state if dialog is still open
+    if (document.getElementById('comment-dialog').style.display === 'flex') {
+        document.getElementById('save-comment-btn').disabled = false;
+        document.getElementById('save-comment-btn').textContent = 'Save';
+    }
+});
+    
+// Close dialog
+closeCommentDialog();
+    
+// Show notification
+alert(`Comment added to the cost record for ${cost.studentName}`);
+    
+// Refresh the display
+applyAllFilters();
 }
 
 function openViewCommentsDialog(costId) {
@@ -479,30 +554,26 @@ function openViewCommentsDialog(costId) {
     const dialogTitle = document.querySelector('#view-comments-dialog .dialog-title');
     dialogTitle.textContent = `Comments for ${cost.studentName}`;
     
-    // Display comments in the table
-    const tableBody = document.getElementById('comments-table-body');
-    tableBody.innerHTML = '';
-    
-    if (cost.notes && cost.notes.length > 0) {
-        cost.notes.forEach(note => {
-            const row = document.createElement('tr');
-            
-            // Format timestamp for display
-            const formattedTimestamp = note.timestamp ? new Date(note.timestamp).toLocaleString() : '';
-            
-            row.innerHTML = `
-                <td>${formattedTimestamp}</td>
-                <td>${note.text}</td>
-                <td>${note.createdBy}</td>
-            `;
-            
-            tableBody.appendChild(row);
-        });
-    } else {
-        const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="3">No comments available</td>';
-        tableBody.appendChild(row);
-    }
+// Display comments in the table
+const tableBody = document.getElementById('comments-table-body');
+tableBody.innerHTML = '';
+
+// Handle the case where notes is a string
+if (typeof cost.notes === 'string' && cost.notes.trim() !== '') {
+    // If notes is a non-empty string, create a single comment entry
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td>${formatDate(cost.date)}</td>
+        <td>${cost.notes}</td>
+        <td>System</td>
+    `;
+    tableBody.appendChild(row);
+} else {
+    // If notes is empty or not a string
+    const row = document.createElement('tr');
+    row.innerHTML = '<td colspan="3">No comments available</td>';
+    tableBody.appendChild(row);
+}
     
     // Store the cost ID for the Add Comment button
     document.getElementById('add-comment-btn').setAttribute('data-cost-id', costId);
@@ -1109,16 +1180,26 @@ async function fetchCosts() {
         const data = await response.json();
         console.log('GET operation - Costs response data:', data);
         
+        // Add this console.log to inspect the raw records
+        console.log('Raw cost records from Airtable:', data.records);
+        
         // Format Airtable records to cost objects
-        costs = data.records.map(record => ({
-            id: record.id,
-            date: record.fields.Date || '',
-            purpose: record.fields.Purpose || '',
-            studentID: record.fields.StudentID || '',
-            studentName: record.fields.StudentName || '',
-            amount: record.fields.Amount || 0,
-            notes: record.fields.Notes || []
-        }));
+        costs = data.records.map(record => {
+            // Add this console.log to inspect each record's fields
+            console.log('Cost record fields:', record.fields);
+            
+            return {
+                id: record.id,
+                date: record.fields.CreatedDateTime || '',
+                purpose: record.fields['Purpose of payment'] || '',
+                studentID: record.fields.StudentID || '',
+                studentName: record.fields['Student Name'] || '',
+                amount: record.fields['Amount CHF'] || 0,
+                notes: record.fields.Notes || []
+            };
+        });
+               // Add this console.log to inspect the formatted costs array
+               console.log('Formatted costs array:', costs); 
         
         // Sort costs by date descending by default
         sortCosts('date');
@@ -1152,15 +1233,27 @@ async function fetchPayments() {
         const data = await response.json();
         console.log('GET operation - Payments response data:', data);
         
+        // Add this console.log to inspect the raw records
+        console.log('Raw payment records from Airtable:', data.records);
+
+
         // Format Airtable records to payment objects
-        payments = data.records.map(record => ({
-            id: record.id,
-            date: record.fields.Date || '',
-            purpose: record.fields.Purpose || '',
-            studentID: record.fields.StudentID || '',
-            studentName: record.fields.StudentName || '',
-            amount: record.fields.Amount || 0
-        }));
+        payments = data.records.map(record => {
+            // Add this console.log to inspect each record's fields
+            console.log('Payment record fields:', record.fields);
+            
+            return {
+                id: record.id,
+                date: record.fields.CreatedDateTime || '',
+                purpose: record.fields['Purpose of payment'] || '',
+                studentID: record.fields.StudentID || '',
+                studentName: record.fields['Student Name']  || '',
+                amount: record.fields['Amount CHF']  || 0
+            };
+        });
+
+        // Add this console.log to inspect the formatted payments array
+        console.log('Formatted payments array:', payments);
         
         // Sort payments by date descending by default
         sortPayments('date');
@@ -1328,7 +1421,7 @@ function displayCosts(costsToDisplay) {
         row.setAttribute('data-id', cost.id);
         
         // Format date for display
-        const formattedDate = new Date(cost.date).toLocaleDateString();
+        const formattedDate = formatDate(cost.date);
         
         // Check if cost has notes
         const hasNotes = cost.notes && cost.notes.length > 0;
@@ -1402,7 +1495,7 @@ function displayPayments(paymentsToDisplay) {
         row.setAttribute('data-id', payment.id);
         
         // Format date for display
-        const formattedDate = new Date(payment.date).toLocaleDateString();
+        const formattedDate = formatDate(payment.date);
         
         row.innerHTML = `
             <td>${formattedDate}</td>
