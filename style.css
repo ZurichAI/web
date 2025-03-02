@@ -5,6 +5,8 @@ header {
     justify-content: space-between; /* Push logo left, links right */
     align-items: center; /* Center vertically */
     border-bottom: 1px solid #e0e0e0; /* Optional: subtle bottom border */
+    max-width: 1200px; /* Limit width to 1200px */
+    margin: 0 auto; /* Center the header */
 }
 
 .logo {
