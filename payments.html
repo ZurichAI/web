@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <meta name="description" content="Payment Management System">
+    <title>Payment Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Additional styles for payment management */
+        
+        /* Dialog styles */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .dialog-box {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .dialog-content {
+            margin-bottom: 20px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Individual button styles */
+        #create-comment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
+        }
+        
+        #create-cost-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 6px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
+        }
+        
+        #save-payment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 6px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
+        }
+        
+        #clear-filters-btn {
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 6px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
+        }
+
+        #cancel-comment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-comment-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #add-comment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #close-comments-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-style: italic;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #cancel-cost-btn, #cancel-payment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-cost-btn, #save-payment-dialog-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-with-reference-payment-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-cost-and-payment-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #add-student-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px 0;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .filters-container {
+            display: grid;
+            grid-template-columns: 2fr 2fr 1fr; /* Decreased the width of the third column */
+            grid-template-rows: auto auto auto; /* Three rows */
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 300px; /* Minimum height of the container */
+        }
+        
+        .filter-box {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.75em;
+        }
+        
+        .button-container {
+            grid-column: 3;
+            grid-row: 1/4; /* Span three rows */
+            height: 300px; /* Fixed height */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;      
+        }
+        
+        /* Filter by instructors – occupies 1 row */
+        .instructor-filter {
+            grid-column: 1;
+            grid-row: 1;
+            background-color: #8bf2f7cb;
+        }
+        
+        /* Filter by groups – occupies 2 rows */
+        .group-filter {
+            grid-column: 2;
+            grid-row: 1 / 3;
+            background-color: #8bf2f7cb;
+        }
+        
+        /* Active filter */
+        .active-filter {
+            grid-column: 1;
+            grid-row: 2;
+            background-color: #8bf2f7cb;
+            height: 70px; 
+            display: flex;
+        }
+        
+        /* Date filter */
+        .date-filter {
+            grid-column: 1;
+            grid-row: 3;
+            background-color: #8bf2f7cb;
+        }
+        
+        /* Student name filter */
+        .student-filter {
+            grid-column: 2;
+            grid-row: 3;
+            background-color: #8bf2f7cb;
+        }
+        
+        /* Block with radio buttons */
+        .active-filter .radio-options {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+        
+        .filter-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .filter-table th, .filter-table td {
+            padding: 4px;
+            text-align: left;
+            border: none;
+        }
+        
+        .filter-table th {
+            font-weight: bold;
+            background-color: transparent;
+        }
+        
+        .tables-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        .table-container {
+            flex: 1;
+            width: 100%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            table-layout: fixed;
+        }
+
+        .select-all {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 5px auto;
+        }
+        
+        /* Checkbox styling for row selection */
+        .row-select {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Styling for selected row */
+        .selected-row {
+            background-color: #e3f2fd; /* Light blue background */
+            font-weight: bold; /* Make text slightly bolder */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        }
+        
+        /* Override the alternating row color when selected */
+        tr.selected-row:nth-child(even) {
+            background-color: #e3f2fd;
+        }
+        
+        /* Add a pointer cursor to table rows to indicate they're clickable */
+        #costs-table tbody tr, #payments-table tbody tr {
+            cursor: pointer;
+        }
+        
+
+
+        
+        /* Embedded table styles */
+        .embedded-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        
+        .embedded-table th, .embedded-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        
+        .embedded-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="Logo" style="height: 40px;">
+            <span>Home</span>
+        </a>
+        <nav>
+            <a href="about.html">About</a>
+            <a href="#">Our Services</a>
+            <a href="contact.html">Let's Talk</a>
+            <a href="instructor.html">Instructor Portal</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <div class="payment-management-header">
+            <h1>Payment Management</h1>
+            <div class="search-container">
+                <input type="search" id="search-purpose-input" placeholder="Search payment purpose...">
+                <input type="search" id="search-student-input" placeholder="Search students...">
+            </div>
+        </div>
+        
+        <div class="filters-container">
+            <!-- Instructor Filter -->
+            <div class="filter-box instructor-filter">
+                <h3>Filter by instructor</h3>
+                <div class="checkbox-container select-all">
+                    <input type="checkbox" id="select-all-instructors" class="instructor-checkbox" checked>
+                    <label for="select-all-instructors">Select all</label>
+                </div>
+                <div id="instructor-checkboxes">
+                    <!-- Will be populated dynamically with a table -->
+                </div>
+            </div>      
+
+            <!-- Group Filter -->
+            <div class="filter-box group-filter">
+                <h3>Filter by Group</h3>
+                <div class="checkbox-container select-all">
+                    <input type="checkbox" id="select-all-groups" class="group-checkbox" checked>
+                    <label for="select-all-groups">Select all</label>
+                </div>
+                <div id="group-checkboxes">
+                    <!-- Will be populated dynamically with a table -->
+                </div>
+            </div>
+            
+            <!-- Active Filter -->
+            <div class="filter-box active-filter">
+                <h3>Active students</h3>
+                
+                <div class="radio-options">
+                    <label>
+                        <input type="radio" id="active-only" name="active-filter" value="active" checked>
+                        Active
+                    </label>
+                    <label>
+                        <input type="radio" id="non-active-only" name="active-filter" value="non-active">
+                        Non active
+                    </label>
+                    <label>
+                        <input type="radio" id="all-students" name="active-filter" value="all">
+                        All
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Date Filter -->
+            <div class="filter-box date-filter">
+                <h3>Filter by Date</h3>
+                <div class="date-inputs">
+                    <div class="form-group">
+                        <label for="date-from">From:</label>
+                        <input type="date" id="date-from" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-to">To:</label>
+                        <input type="date" id="date-to" class="dialog-input">
+                    </div>
+                </div>
+            </div>
+            
+
+        
+            <!-- Buttons -->
+            <div class="button-container">
+                <button id="clear-filters-btn">Clear all filters</button>
+                <button id="create-comment-btn" disabled>Create comment</button>
+                <button id="create-cost-btn">Create cost</button>
+                <button id="save-payment-btn" disabled>Save payment</button>
+            </div>
+        </div>
+       
+        <div class="main-content">
+            <!-- Costs and Payments Tables -->
+            <div class="tables-container">
+                <!-- Costs Table -->
+                <div class="table-container">
+                    <h2>Costs</h2>
+                    <table id="costs-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30px;"><input type="checkbox" id="select-all-costs" title="Select all costs"></th>
+                                <th data-sort="date">Date</th>
+                                <th data-sort="purpose">Purpose</th>
+                                <th data-sort="studentName">Student Name</th>
+                                <th data-sort="amount">Amount</th>
+                                <th style="width: 70px;" title="Has comments">Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody id="costs-table-body">
+                            <!-- Cost data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Payments Table -->
+                <div class="table-container">
+                    <h2>Payments</h2>
+                    <table id="payments-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="date">Date</th>
+                                <th data-sort="purpose">Purpose</th>
+                                <th data-sort="studentName">Student Name</th>
+                                <th data-sort="amount">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payments-table-body">
+                            <!-- Payment data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for adding comments -->
+    <div class="dialog-overlay" id="comment-dialog">
+        <div class="dialog-box">
+            <h3 class="dialog-title">Add a comment</h3>
+            <div class="dialog-content">
+                <div class="form-group">
+                    <label for="comment-date">Date:</label>
+                    <input type="text" id="comment-date" class="dialog-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="comment-student">Student:</label>
+                    <input type="text" id="comment-student" class="dialog-input" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="comment-input">Comment:</label>
+                    <textarea class="dialog-input" id="comment-input" placeholder="Add a comment"></textarea>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-comment-btn">Cancel</button>
+                <button id="save-comment-btn" disabled>Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for viewing comments -->
+    <div class="dialog-overlay" id="view-comments-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Comments</h3>
+            <div class="dialog-content">
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                    <table id="comments-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Comment</th>
+                                <th>Created By</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comments-table-body">
+                            <!-- Comments will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="add-comment-btn">Add comment</button>
+                <button id="close-comments-btn">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for creating cost -->
+    <div class="dialog-overlay" id="create-cost-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Create Cost</h3>
+            <div class="dialog-content">
+                <form id="create-cost-form">
+                    <div class="form-group">
+                        <label for="cost-date">Date:</label>
+                        <input type="date" id="cost-date" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cost-purpose">Purpose:</label>
+                        <input type="text" id="cost-purpose" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cost-amount">Amount CHF:</label>
+                        <input type="number" id="cost-amount" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Students:</label>
+                        <table class="embedded-table" id="cost-students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Group</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cost-students-table-body">
+                                <!-- Will be populated dynamically -->
+                            </tbody>
+                        </table>
+                        <button type="button" id="add-student-btn">+ Add student</button>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-cost-btn">Cancel</button>
+                <button id="save-cost-btn" disabled>Save cost</button>
+                <button id="save-with-reference-payment-btn" disabled>Save with reference payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming cost creation -->
+    <div class="dialog-overlay" id="confirm-cost-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Cost Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-cost-message"></p>
+                <div id="confirm-cost-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-cost-btn">No</button>
+                <button id="save-confirm-cost-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for creating payment with reference -->
+    <div class="dialog-overlay" id="create-payment-reference-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Create Payment with Reference</h3>
+            <div class="dialog-content">
+                <form id="create-payment-reference-form">
+                    <div class="form-group">
+                        <label for="payment-ref-date">Date:</label>
+                        <input type="date" id="payment-ref-date" class="dialog-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-ref-purpose">Purpose:</label>
+                        <input type="text" id="payment-ref-purpose" class="dialog-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Students:</label>
+                        <table class="embedded-table" id="payment-ref-students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Cost to add</th>
+                                    <th>Payment to add</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payment-ref-students-table-body">
+                                <!-- Will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-payment-ref-btn">Cancel</button>
+                <button id="save-cost-and-payment-btn">Save cost and payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming cost and payment creation -->
+    <div class="dialog-overlay" id="confirm-cost-payment-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Cost and Payment Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-cost-payment-message"></p>
+                <div id="confirm-cost-payment-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-cost-payment-btn">No</button>
+                <button id="save-confirm-cost-payment-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for creating payment -->
+    <div class="dialog-overlay" id="create-payment-dialog">
+        <div class="dialog-box" style="width: 500px; max-width: 90%;">
+            <h3 class="dialog-title">Save Payment</h3>
+            <div class="dialog-content">
+                <form id="create-payment-form">
+                    <div class="form-group">
+                        <label for="payment-date">Date:</label>
+                        <input type="date" id="payment-date" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-purpose">Purpose:</label>
+                        <input type="text" id="payment-purpose" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Amount CHF:</label>
+                        <input type="number" id="payment-amount" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-student">Student Name:</label>
+                        <select id="payment-student" class="dialog-input" required>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-payment-btn">Cancel</button>
+                <button id="save-payment-dialog-btn" disabled>Save payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming payment creation -->
+    <div class="dialog-overlay" id="confirm-payment-dialog">
+        <div class="dialog-box" style="width: 500px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Payment Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-payment-message"></p>
+                <div id="confirm-payment-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-payment-btn">No</button>
+                <button id="save-confirm-payment-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script src="payments.js"></script>
+</body>
+</html>

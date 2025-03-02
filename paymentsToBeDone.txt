@@ -1,0 +1,2 @@
+# Missing Functionality and Recommendations for payments.html and payments.js
+
