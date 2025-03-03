@@ -265,9 +265,46 @@ function sortPayments(field) {
     });
 }
 
+// Helper function to update student dropdown with all students
+function updateStudentDropdown(dropdown, existingStudentIds) {
+    // Clear existing options except the first one (Select a student)
+    while (dropdown.options.length > 1) {
+        dropdown.remove(1);
+    }
+    
+    // Filter students to exclude those already in the table
+    const filteredStudents = students.filter(student => 
+        !existingStudentIds.includes(student.id)
+    );
+    
+    // Sort students by name
+    filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add filtered students to the dropdown
+    filteredStudents.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student.id;
+        option.textContent = student.name;
+        dropdown.appendChild(option);
+    });
+    
+    console.log(`Updated dropdown with ${filteredStudents.length} students`);
+}
+
 // Add student to cost table
-function addStudentToCostTable() {
-    // Create a dropdown with all students
+async function addStudentToCostTable() {
+    console.log("Starting addStudentToCostTable function");
+    console.log("Current students array:", students);
+    
+    // Get the list of students already in the table to avoid duplicates
+    const studentsTable = document.getElementById('cost-students-table-body');
+    const existingStudentIds = Array.from(studentsTable.querySelectorAll('tr'))
+        .map(row => row.getAttribute('data-student-id'))
+        .filter(Boolean);
+    
+    console.log("Existing student IDs in the table:", existingStudentIds);
+    
+    // Create a dropdown with students
     const studentsDropdown = document.createElement('select');
     studentsDropdown.className = 'dialog-input';
     
@@ -277,19 +314,55 @@ function addStudentToCostTable() {
     emptyOption.textContent = 'Select a student';
     studentsDropdown.appendChild(emptyOption);
     
-    // Add all students to the dropdown
-    studentNames.forEach(name => {
-        const student = students.find(s => s.name === name);
-        if (student) {
-            const option = document.createElement('option');
-            option.value = student.id;
-            option.textContent = name;
-            studentsDropdown.appendChild(option);
-        }
+    // Make sure students array is populated - always fetch fresh students
+    console.log("Fetching fresh students data...");
+    try {
+        // Wait for students to be fetched
+        await fetchStudents();
+        console.log(`Students fetched successfully, found ${students.length} students:`, students);
+    } catch (error) {
+        console.error("Error fetching students:", error);
+    }
+    
+    // Save the current active filter state
+    const activeFilter = document.querySelector('input[name="active-filter"]:checked').value;
+    console.log("Current active filter:", activeFilter);
+    
+    // Temporarily set active filter to 'all' to get all students
+    document.getElementById('all-students').checked = true;
+    
+    // Always show all students from the student table, regardless of cost selection or active status
+    // Only filter out students already in the table
+    let filteredStudents = students.filter(student => 
+        !existingStudentIds.includes(student.id)
+    );
+    
+    // Restore the original active filter
+    if (activeFilter === 'active') {
+        document.getElementById('active-only').checked = true;
+    } else if (activeFilter === 'non-active') {
+        document.getElementById('non-active-only').checked = true;
+    } else {
+        document.getElementById('all-students').checked = true;
+    }
+    
+    console.log("Filtered students (removing only existing ones):", filteredStudents);
+    
+    // Sort students by name
+    filteredStudents.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add filtered students to the dropdown
+    filteredStudents.forEach(student => {
+        const option = document.createElement('option');
+        option.value = student.id;
+        option.textContent = student.name;
+        studentsDropdown.appendChild(option);
     });
     
+    // Log the number of students added to the dropdown
+    console.log(`Added ${filteredStudents.length} students to the dropdown`);
+    
     // Create a new row for the students table
-    const studentsTable = document.getElementById('cost-students-table-body');
     const newRow = document.createElement('tr');
     
     // Create cells for the row

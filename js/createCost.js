@@ -11,7 +11,53 @@ function openCreateCostDialog() {
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('cost-date').value = today;
     
-    // Disable save buttons initially
+    // Check if there are selected rows in the costs table
+    if (selectedCostRows.length > 0) {
+        // Get unique students from selected cost rows
+        const uniqueStudents = new Map();
+        
+        selectedCostRows.forEach(costId => {
+            const cost = costs.find(c => c.id === costId);
+            if (cost && cost.studentID && cost.studentName) {
+                // Use Map to ensure uniqueness by student ID
+                if (!uniqueStudents.has(cost.studentID)) {
+                    uniqueStudents.set(cost.studentID, {
+                        id: cost.studentID,
+                        name: cost.studentName,
+                        group: students.find(s => s.id === cost.studentID)?.group || ''
+                    });
+                }
+            }
+        });
+        
+        // Add selected students to the table
+        uniqueStudents.forEach(student => {
+            const studentsTable = document.getElementById('cost-students-table-body');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-student-id', student.id);
+            
+            newRow.innerHTML = `
+                <td>${student.name}</td>
+                <td>${student.group}</td>
+                <td>
+                    <button class="btn btn-danger">Remove</button>
+                </td>
+            `;
+            
+            // Add event listener to remove button
+            newRow.querySelector('button').addEventListener('click', () => {
+                newRow.remove();
+                validateCostForm();
+            });
+            
+            studentsTable.appendChild(newRow);
+        });
+        
+        // Validate form to enable/disable save buttons
+        validateCostForm();
+    }
+    
+    // Disable save buttons initially (will be enabled by validateCostForm if students are added)
     document.getElementById('save-cost-btn').disabled = true;
     document.getElementById('save-with-reference-payment-btn').disabled = true;
     
@@ -59,14 +105,31 @@ function openConfirmCostDialog() {
     
     studentRows.forEach(row => {
         const studentId = row.getAttribute('data-student-id');
-        const studentName = row.cells[0].textContent;
-        const studentGroup = row.cells[1].textContent;
-        
-        selectedStudents.push({
-            id: studentId,
-            name: studentName,
-            group: studentGroup
-        });
+        // Only include rows that have a valid student ID
+        if (studentId) {
+            let studentName;
+            const studentGroup = row.cells[1].textContent;
+            
+            // Check if the first cell contains a dropdown (added with "+ Add student" button)
+            const dropdown = row.cells[0].querySelector('select');
+            if (dropdown) {
+                // Get the selected option's text
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                studentName = selectedOption ? selectedOption.textContent : '';
+            } else {
+                // Regular row, get the text content
+                studentName = row.cells[0].textContent;
+            }
+            
+            // Skip rows where the student name is "Select a student"
+            if (studentName !== 'Select a student') {
+                selectedStudents.push({
+                    id: studentId,
+                    name: studentName,
+                    group: studentGroup
+                });
+            }
+        }
     });
     
     // Validate form
@@ -138,18 +201,35 @@ function openCreatePaymentReferenceDialog() {
     
     studentRows.forEach(row => {
         const studentId = row.getAttribute('data-student-id');
-        const studentName = row.cells[0].textContent;
-        
-        const newRow = document.createElement('tr');
-        newRow.setAttribute('data-student-id', studentId);
-        
-        newRow.innerHTML = `
-            <td>${studentName}</td>
-            <td>${amount}</td>
-            <td><input type="number" class="dialog-input payment-amount" value="${amount}" min="0" step="0.01"></td>
-        `;
-        
-        paymentRefStudentsTable.appendChild(newRow);
+        // Only include rows that have a valid student ID
+        if (studentId) {
+            let studentName;
+            
+            // Check if the first cell contains a dropdown (added with "+ Add student" button)
+            const dropdown = row.cells[0].querySelector('select');
+            if (dropdown) {
+                // Get the selected option's text
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                studentName = selectedOption ? selectedOption.textContent : '';
+            } else {
+                // Regular row, get the text content
+                studentName = row.cells[0].textContent;
+            }
+            
+            // Skip rows where the student name is "Select a student"
+            if (studentName !== 'Select a student') {
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-student-id', studentId);
+                
+                newRow.innerHTML = `
+                    <td>${studentName}</td>
+                    <td>${amount}</td>
+                    <td><input type="number" class="dialog-input payment-amount" value="${amount}" min="0" step="0.01"></td>
+                `;
+                
+                paymentRefStudentsTable.appendChild(newRow);
+            }
+        }
     });
     
     // Show dialog
@@ -233,41 +313,122 @@ function saveCost() {
     
     studentRows.forEach(row => {
         const studentId = row.getAttribute('data-student-id');
-        const studentName = row.cells[0].textContent;
+        // Only include rows that have a valid student ID
+        if (studentId) {
+            let studentName;
+            
+            // Check if the first cell contains a dropdown (added with "+ Add student" button)
+            const dropdown = row.cells[0].querySelector('select');
+            if (dropdown) {
+                // Get the selected option's text
+                const selectedOption = dropdown.options[dropdown.selectedIndex];
+                studentName = selectedOption ? selectedOption.textContent : '';
+            } else {
+                // Regular row, get the text content
+                studentName = row.cells[0].textContent;
+            }
+            
+            // Skip rows where the student name is "Select a student"
+            if (studentName !== 'Select a student') {
+                selectedStudents.push({
+                    id: studentId,
+                    name: studentName
+                });
+            }
+        }
+    });
+    
+    // Show loading indicator
+    const saveButton = document.getElementById('save-confirm-cost-btn');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Create a promise for each student to track all API calls
+    const promises = selectedStudents.map(student => {
+        // Prepare the data for Airtable
+        const newCostData = {
+            fields: {
+                'CreatedDateTime': date,
+                'Purpose of payment': purpose,
+                'StudentID': student.id,
+                'Student Name': student.name,
+                'Amount CHF': amount
+            }
+        };
         
-        selectedStudents.push({
-            id: studentId,
-            name: studentName
+        // Make the API call to create the record
+        const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.cost}`;
+        
+        return fetch(airtableApiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${config.airtable.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newCostData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Cost created successfully:', data);
+            
+            // Create a local cost object from the response
+            const newCost = {
+                id: data.id,
+                date: data.fields.CreatedDateTime || date,
+                purpose: data.fields['Purpose of payment'] || purpose,
+                studentID: data.fields.StudentID || student.id,
+                studentName: data.fields['Student Name'] || student.name,
+                amount: data.fields['Amount CHF'] || amount,
+                notes: []
+            };
+            
+            // Add to costs array
+            costs.push(newCost);
+            successCount++;
+        })
+        .catch(error => {
+            console.error('Error creating cost:', error);
+            errorCount++;
+            return Promise.resolve(); // Continue with other students even if one fails
         });
     });
     
-    // Create cost records for each student
-    selectedStudents.forEach(student => {
-        // In a real implementation, this would send a request to Airtable
-        // For now, we'll just simulate it
-        const newCost = {
-            id: `cost_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            date,
-            purpose,
-            studentID: student.id,
-            studentName: student.name,
-            amount,
-            notes: []
-        };
-        
-        // Add to costs array
-        costs.push(newCost);
-    });
-    
-    // Close dialogs
-    closeConfirmCostDialog();
-    closeCreateCostDialog();
-    
-    // Show notification
-    alert(`Cost created successfully for ${selectedStudents.length} student(s).`);
-    
-    // Refresh the display
-    applyAllFilters();
+    // Wait for all API calls to complete
+    Promise.all(promises)
+        .then(() => {
+            // Reset button state before closing dialogs
+            saveButton.disabled = false;
+            saveButton.textContent = 'Yes';
+            
+            // Close dialogs
+            closeConfirmCostDialog();
+            closeCreateCostDialog();
+            
+            // Show notification
+            if (successCount > 0) {
+                alert(`Cost created successfully for ${successCount} student(s).${errorCount > 0 ? ` Failed for ${errorCount} student(s).` : ''}`);
+            } else {
+                alert('Failed to create costs. Please try again.');
+            }
+            
+            // Refresh the display
+            applyAllFilters();
+        })
+        .catch(error => {
+            console.error('Error in Promise.all:', error);
+            
+            // Reset button state
+            saveButton.disabled = false;
+            saveButton.textContent = 'Yes';
+        });
 }
 
 function saveCostAndPayment() {
@@ -294,42 +455,142 @@ function saveCostAndPayment() {
         });
     });
     
-    // Create cost and payment records for each student
-    studentsData.forEach(student => {
-        // Create cost record
-        const newCost = {
-            id: `cost_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            date,
-            purpose,
-            studentID: student.id,
-            studentName: student.name,
-            amount: student.costAmount,
-            notes: []
+    // Show loading indicator
+    const saveButton = document.getElementById('save-confirm-cost-payment-btn');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // Create a promise for each student to track all API calls
+    const promises = studentsData.map(student => {
+        // Prepare the cost data for Airtable
+        const newCostData = {
+            fields: {
+                'CreatedDateTime': date,
+                'Purpose of payment': purpose,
+                'StudentID': student.id,
+                'Student Name': student.name,
+                'Amount CHF': student.costAmount
+            }
         };
         
-        // Create payment record
-        const newPayment = {
-            id: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            date,
-            purpose,
-            studentID: student.id,
-            studentName: student.name,
-            amount: student.paymentAmount
+        // Prepare the payment data for Airtable
+        const newPaymentData = {
+            fields: {
+                'CreatedDateTime': date,
+                'Purpose of payment': purpose,
+                'StudentID': student.id,
+                'Student Name': student.name,
+                'Amount CHF': student.paymentAmount
+            }
         };
         
-        // Add to arrays
-        costs.push(newCost);
-        payments.push(newPayment);
+        // Make the API calls to create the records
+        const costApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.cost}`;
+        const paymentApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.payment}`;
+        
+        // First create the cost record
+        return fetch(costApiUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${config.airtable.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newCostData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Airtable API error (cost): ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(costData => {
+            console.log('Cost created successfully:', costData);
+            
+            // Create a local cost object from the response
+            const newCost = {
+                id: costData.id,
+                date: costData.fields.CreatedDateTime || date,
+                purpose: costData.fields['Purpose of payment'] || purpose,
+                studentID: costData.fields.StudentID || student.id,
+                studentName: costData.fields['Student Name'] || student.name,
+                amount: costData.fields['Amount CHF'] || student.costAmount,
+                notes: []
+            };
+            
+            // Add to costs array
+            costs.push(newCost);
+            
+            // Then create the payment record
+            return fetch(paymentApiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${config.airtable.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newPaymentData)
+            });
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Airtable API error (payment): ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(paymentData => {
+            console.log('Payment created successfully:', paymentData);
+            
+            // Create a local payment object from the response
+            const newPayment = {
+                id: paymentData.id,
+                date: paymentData.fields.CreatedDateTime || date,
+                purpose: paymentData.fields['Purpose of payment'] || purpose,
+                studentID: paymentData.fields.StudentID || student.id,
+                studentName: paymentData.fields['Student Name'] || student.name,
+                amount: paymentData.fields['Amount CHF'] || student.paymentAmount
+            };
+            
+            // Add to payments array
+            payments.push(newPayment);
+            
+            successCount++;
+        })
+        .catch(error => {
+            console.error('Error creating cost and payment:', error);
+            errorCount++;
+            return Promise.resolve(); // Continue with other students even if one fails
+        });
     });
     
-    // Close dialogs
-    closeConfirmCostPaymentDialog();
-    closeCreatePaymentReferenceDialog();
-    closeCreateCostDialog();
-    
-    // Show notification
-    alert(`Cost and payment records created successfully for ${studentsData.length} student(s).`);
-    
-    // Refresh the display
-    applyAllFilters();
+    // Wait for all API calls to complete
+    Promise.all(promises)
+        .then(() => {
+            // Reset button state before closing dialogs
+            saveButton.disabled = false;
+            saveButton.textContent = 'Yes';
+            
+            // Close dialogs
+            closeConfirmCostPaymentDialog();
+            closeCreatePaymentReferenceDialog();
+            closeCreateCostDialog();
+            
+            // Show notification
+            if (successCount > 0) {
+                alert(`Cost and payment records created successfully for ${successCount} student(s).${errorCount > 0 ? ` Failed for ${errorCount} student(s).` : ''}`);
+            } else {
+                alert('Failed to create cost and payment records. Please try again.');
+            }
+            
+            // Refresh the display
+            applyAllFilters();
+        })
+        .catch(error => {
+            console.error('Error in Promise.all:', error);
+            
+            // Reset button state
+            saveButton.disabled = false;
+            saveButton.textContent = 'Yes';
+        });
 }
