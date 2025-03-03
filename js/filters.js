@@ -127,8 +127,37 @@ function applyAllFilters() {
     // Update filter counts
     updateFilterCounts(filteredCosts, filteredPayments);
     
+    // Update totals
+    updateTotals(filteredCosts, filteredPayments);
+    
     // Update button states
     updateButtonStates();
+}
+
+// Update totals based on filtered costs and payments
+function updateTotals(filteredCosts, filteredPayments) {
+    // Calculate total cost
+    const totalCost = filteredCosts.reduce((sum, cost) => sum + parseFloat(cost.amount), 0);
+    
+    // Calculate total payment
+    const totalPayment = filteredPayments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+    
+    // Calculate balance (payment - cost)
+    const balance = totalPayment - totalCost;
+    
+    // Update the display
+    document.getElementById('total-cost').textContent = totalCost.toFixed(2);
+    document.getElementById('total-payment').textContent = totalPayment.toFixed(2);
+    
+    const balanceElement = document.getElementById('balance');
+    balanceElement.textContent = balance.toFixed(2);
+    
+    // Apply styling based on balance value
+    if (balance < 0) {
+        balanceElement.className = 'negative';
+    } else {
+        balanceElement.className = 'positive';
+    }
 }
 
 function clearAllFilters() {

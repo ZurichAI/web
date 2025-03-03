@@ -419,7 +419,7 @@ function saveCost() {
                 alert('Failed to create costs. Please try again.');
             }
             
-            // Refresh the display
+            // Refresh the display and update totals
             applyAllFilters();
         })
         .catch(error => {
@@ -583,7 +583,7 @@ function saveCostAndPayment() {
                 alert('Failed to create cost and payment records. Please try again.');
             }
             
-            // Refresh the display
+            // Refresh the display and update totals
             applyAllFilters();
         })
         .catch(error => {

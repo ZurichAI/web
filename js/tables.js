@@ -201,6 +201,9 @@ function sortCosts(field) {
     // Display sorted costs
     displayCosts(visibleCosts);
     
+    // Update totals
+    updateTotals(visibleCosts, visiblePayments);
+    
     // Update table headers
     const tableHeaders = document.querySelectorAll('#costs-table th[data-sort]');
     tableHeaders.forEach(header => {
@@ -252,6 +255,9 @@ function sortPayments(field) {
     
     // Display sorted payments
     displayPayments(visiblePayments);
+    
+    // Update totals
+    updateTotals(visibleCosts, visiblePayments);
     
     // Update table headers
     const tableHeaders = document.querySelectorAll('#payments-table th[data-sort]');

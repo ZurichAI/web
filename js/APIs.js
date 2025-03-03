@@ -87,8 +87,16 @@ async function fetchCosts() {
         // Sort costs by date descending by default
         sortCosts('date');
         
+        // Set visibleCosts to all costs initially
+        visibleCosts = [...costs];
+        
         // Display costs
         displayCosts(costs);
+        
+        // Update totals if payments are already loaded
+        if (payments.length > 0) {
+            updateTotals(visibleCosts, visiblePayments);
+        }
     } catch (error) {
         console.error('Error fetching costs:', error);
         alert('Error fetching costs data. Please try again.');
@@ -141,8 +149,16 @@ async function fetchPayments() {
         // Sort payments by date descending by default
         sortPayments('date');
         
+        // Set visiblePayments to all payments initially
+        visiblePayments = [...payments];
+        
         // Display payments
         displayPayments(payments);
+        
+        // Update totals if costs are already loaded
+        if (costs.length > 0) {
+            updateTotals(visibleCosts, visiblePayments);
+        }
     } catch (error) {
         console.error('Error fetching payments:', error);
         alert('Error fetching payments data. Please try again.');

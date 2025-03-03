@@ -360,3 +360,41 @@ tr.selected-row:nth-child(even) {
     background-color: #f2f2f2;
     font-weight: bold;
 }
+
+/* Totals container styles */
+.totals-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.total-box {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.total-box h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.total-box div {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+#balance.positive {
+    color: green;
+}
+
+#balance.negative {
+    color: red;
+}

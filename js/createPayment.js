@@ -114,6 +114,6 @@ function savePayment() {
     // Show notification
     alert(`Payment created successfully for ${studentName}.`);
     
-    // Refresh the display
+    // Refresh the display and update totals
     applyAllFilters();
 }

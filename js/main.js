@@ -46,6 +46,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize event listeners
     initEventListeners();
+    
+    // Initialize totals with empty arrays (will be updated when data is loaded)
+    updateTotals([], []);
+    
+    // Add an event listener that will update totals once all data is loaded
+    window.addEventListener('load', () => {
+        // Wait a bit longer to ensure all async data is loaded
+        setTimeout(() => {
+            // Make sure visibleCosts and visiblePayments are populated
+            if (costs.length > 0 && visibleCosts.length === 0) {
+                visibleCosts = [...costs];
+            }
+            if (payments.length > 0 && visiblePayments.length === 0) {
+                visiblePayments = [...payments];
+            }
+            
+            // Update totals with the current visible data
+            updateTotals(visibleCosts, visiblePayments);
+        }, 1000);
+    });
+    
+    // Force a clear all filters operation after a short delay to ensure totals are displayed correctly
+    setTimeout(() => {
+        clearAllFilters();
+    }, 500);
 });
 
 // Initialize event listeners
