@@ -94,26 +94,72 @@ function savePayment() {
     const studentName = studentSelect.options[studentSelect.selectedIndex].text;
     const studentId = students.find(s => s.name === studentName)?.id || '';
     
-    // Create payment record
-    const newPayment = {
-        id: `payment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        date,
-        purpose,
-        studentID: studentId,
-        studentName,
-        amount
+    // Disable the save button to prevent multiple submissions
+    const saveButton = document.getElementById('save-confirm-payment-btn');
+    saveButton.disabled = true;
+    saveButton.textContent = 'Saving...';
+    
+    // Prepare the payment data for Airtable
+    const newPaymentData = {
+        fields: {
+            'CreatedDateTime': date,
+            'Purpose of payment': purpose,
+            'StudentID': studentId,
+            'Student Name': studentName,
+            'Amount CHF': amount
+        }
     };
     
-    // Add to payments array
-    payments.push(newPayment);
+    // Make the API call to create the payment record
+    const paymentApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.payment}`;
     
-    // Close dialogs
-    closeConfirmPaymentDialog();
-    closeCreatePaymentDialog();
-    
-    // Show notification
-    alert(`Payment created successfully for ${studentName}.`);
-    
-    // Refresh the display and update totals
-    applyAllFilters();
+    fetch(paymentApiUrl, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${config.airtable.apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newPaymentData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Payment created successfully:', data);
+        
+        // Create a local payment object from the response
+        const newPayment = {
+            id: data.id,
+            date: data.fields.CreatedDateTime || date,
+            purpose: data.fields['Purpose of payment'] || purpose,
+            studentID: data.fields.StudentID || studentId,
+            studentName: data.fields['Student Name'] || studentName,
+            amount: data.fields['Amount CHF'] || amount
+        };
+        
+        // Add to payments array
+        payments.push(newPayment);
+        
+        // Close dialogs
+        closeConfirmPaymentDialog();
+        closeCreatePaymentDialog();
+        
+        // Show notification
+        alert(`Payment created successfully for ${studentName}.`);
+        
+        // Refresh the display and update totals
+        applyAllFilters();
+    })
+    .catch(error => {
+        console.error('Error creating payment:', error);
+        alert(`Failed to create payment: ${error.message}`);
+    })
+    .finally(() => {
+        // Reset button state
+        saveButton.disabled = false;
+        saveButton.textContent = 'Yes';
+    });
 }

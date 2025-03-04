@@ -93,6 +93,7 @@ function validateCostForm() {
 }
 
 function openConfirmCostDialog() {
+    console.log('openConfirmCostDialog called'); // Debug log
     // Get form values
     const date = document.getElementById('cost-date').value;
     const purpose = document.getElementById('cost-purpose').value.trim();
