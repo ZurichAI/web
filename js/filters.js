@@ -242,7 +242,9 @@ function populateFilterCheckboxes() {
         const checkboxCell = document.createElement('td');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = `instructor-${instructor.replace(/\s+/g, '-')}`;
+        // Convert instructor to string and sanitize for use in ID
+        const instructorStr = String(instructor).replace(/\s+/g, '-');
+        checkbox.id = `instructor-${instructorStr}`;
         checkbox.className = 'instructor-checkbox';
         checkbox.value = instructor;
         checkbox.checked = true;
@@ -309,7 +311,9 @@ function populateFilterCheckboxes() {
         const checkboxCell = document.createElement('td');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.id = `group-${group.replace(/\s+/g, '-')}`;
+        // Convert group to string and sanitize for use in ID
+        const groupStr = String(group).replace(/\s+/g, '-');
+        checkbox.id = `group-${groupStr}`;
         checkbox.className = 'group-checkbox';
         checkbox.value = group;
         checkbox.checked = true;
@@ -371,7 +375,9 @@ function updateFilterCounts(filteredCosts, filteredPayments) {
         });
         
         // Find the count cell for this instructor
-        const instructorRow = document.querySelector(`#instructor-${instructor.replace(/\s+/g, '-')}`);
+        // Convert instructor to string and sanitize for use in ID
+        const instructorStr = String(instructor).replace(/\s+/g, '-');
+        const instructorRow = document.querySelector(`#instructor-${instructorStr}`);
         if (instructorRow) {
             const countCell = instructorRow.closest('tr').cells[2];
             countCell.textContent = instructorStudents.length;
@@ -411,7 +417,9 @@ function updateFilterCounts(filteredCosts, filteredPayments) {
         });
         
         // Find the count cell for this group
-        const groupRow = document.querySelector(`#group-${group.replace(/\s+/g, '-')}`);
+        // Convert group to string and sanitize for use in ID
+        const groupStr = String(group).replace(/\s+/g, '-');
+        const groupRow = document.querySelector(`#group-${groupStr}`);
         if (groupRow) {
             const countCell = groupRow.closest('tr').cells[2];
             countCell.textContent = groupStudents.length;

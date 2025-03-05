@@ -34,10 +34,14 @@ function formatDate(dateString) {
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default date for cost creation
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('cost-date').value = today;
-    // Date input for payment permanently removed
+// Set default date for cost creation
+const today = new Date().toISOString().split('T')[0];
+// Check if cost-date element exists before setting its value
+const costDateElement = document.getElementById('cost-date');
+if (costDateElement) {
+    costDateElement.value = today;
+}
+// Date input for payment permanently removed
     
     // Fetch data
     fetchStudents();
