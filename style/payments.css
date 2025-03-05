@@ -246,21 +246,21 @@
 .instructor-filter {
     grid-column: 1/3; /* Span two columns */
     grid-row: 1;
-    background-color: #8bf2f7cb;
+    background-color: #b5eef2c3;
 }
 
 /* Filter by groups – occupies 2 rows */
 .group-filter {
     grid-column: 3;
     grid-row: 1 / 3;
-    background-color: #8bf2f7cb;
+    background-color: #b5eef2c3;
 }
 
 /* Active filter */
 .active-filter {
     grid-column: 2;
     grid-row: 2;
-    background-color: #8bf2f7cb;
+    background-color: #b5eef2c3;
     height: 70px; 
     display: flex;
 }
@@ -269,16 +269,13 @@
 .date-filter {
     grid-column: 1;
     grid-row: 2;
-    background-color: #8bf2f7cb;
-    padding: 1rem; /* Optional padding */
-    /* You can remove or add additional styling as needed */
+    background-color: #b5eef2c3;
 }
 
 /* Rows to separate labels and inputs */
 .date-filter-row {
     display: flex;
-    justify-content: right;
-    margin-bottom: 0.5rem;
+    justify-content: left
 }
 
 /* Columns to align "From" and "To" side by side */

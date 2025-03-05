@@ -11,16 +11,16 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="logo">
+        <div class="logo">
             <img src="images/logo.png" alt="Logo" style="height: 40px;">
-            <span>Home</span>
-        </a>
+            <span>Yoga CRM portal</span>
+        </div>
         <nav>
-            <a href="about.html">About</a>
-            <a href="#">Our Services</a>
-            <a href="contact.html">Let's Talk</a>
-            <a href="instructor.html">Instructor Portal</a>
+            <a href="students.html">Students</a>
+            <a href="payments.html">Payments</a>
         </nav>
+        <span id="current-user" class="current-user"></span>
+        <a href="index.html" class="logout-link" onclick="logout()">Logout</a>
     </header>
     
     <div class="container">
@@ -390,7 +390,7 @@
         </div>
     </div>
     
-    <script src="config.js"></script>
+    <script src="js/config.js"></script>
     <script src="js/main.js"></script>
     <script src="js/APIs.js"></script>
     <script src="js/filters.js"></script>
@@ -398,5 +398,7 @@
     <script src="js/paymentComment.js"></script>
     <script src="js/createCost.js"></script>
     <script src="js/createPayment.js"></script>
+    <script src="js/login.js"></script>
 </body>
 </html>
+

@@ -2,7 +2,7 @@ header {
     background-color: #f5f5f5; /* Light gray background */
     padding: 10px 20px; /* Space inside the header (top/bottom 10px, left/right 20px) */
     display: flex; /* Arrange items horizontally */
-    justify-content: space-between; /* Push logo left, links right */
+    justify-content: flex-start; /* Start items from the left */
     align-items: center; /* Center vertically */
     border-bottom: 1px solid #e0e0e0; /* Optional: subtle bottom border */
     max-width: 1200px; /* Limit width to 1200px */
@@ -10,82 +10,58 @@ header {
 }
 
 .logo {
-/*    background-image: url(https://zurichai.github.io/web/images/logo.png); */
     display: flex; /* Align icon and text horizontally */
     align-items: center; /* Center vertically */
     font-size: 1.5em; /* Bigger text for the logo */
     font-weight: bold; /* Make it bold */
     color: #1e90ff; /* Blue color like in the screenshot */
-    text-decoration: none;
+    margin-right: 20px; /* Space between logo and navigation */
 }
 .logo img {
-    margin-right: 10px; /* Space between icon and "Arises" */
-}
-.logo:hover {
-    text-decoration: underline; /* Remove underline on hover */
+    margin-right: 10px; /* Space between icon and text */
 }
 
 .logo .icon {
-    margin-right: 5px; /* Space between icon and "Arises" */
+    margin-right: 5px; /* Space between icon and text */
+}
+
+nav {
+    display: flex; /* Arrange links horizontally */
+    margin-right: auto; /* Push nav to the left */
 }
 
 nav a {
     color: #1e90ff; /* Blue links */
     text-decoration: none; /* Remove underlines */
-    margin-left: 20px; /* Space between links */
+    margin-right: 20px; /* Space between links */
     font-size: 1em; /* Standard text size */
 }
 
 nav a:hover {
     text-decoration: underline; /* Underline on hover for interactivity */
 }
+
+.current-user {
+    color: #333; /* Dark gray color for username */
+    font-weight: bold; /* Make it bold */
+    margin-left: auto; /* Push to the right */
+    margin-right: 15px; /* Space between username and logout link */
+}
+
+.logout-link {
+    color: #e74c3c; /* Red color for logout */
+    text-decoration: none; /* Remove underlines */
+    font-weight: bold; /* Make it bold */
+}
+
+.logout-link:hover {
+    text-decoration: underline; /* Underline on hover */
+}
 body {
     font-size: 16px;
     font-family: Arial, sans-serif;
     text-align: left;
     background-color: lightgray; /* Светло-серый фон */
-}
-.content {
-    display: grid; /* Use grid layout */
-    grid-template-columns: 400px auto; /* First column 400px for image, second column auto for clock/date */
-    gap: 20px; /* Space between grid items */
-    margin: 20px 0; /* Space above and below the entire content */
-}
-
-#body-image {
-    width: 100%; /* Fill the grid column */
-    height: auto; /* Maintain aspect ratio */
-    grid-column: 1; /* Explicitly place in the first column */
-}
-
-#clock {
-    font-size: 2em;
-    color: blue;
-    grid-column: 2; /* Place in the second column */
-    grid-row: 1; /* Place in the first row of the second column */
-}
-
-#date {
-    font-size: 1.5em;
-    color: green;
-    grid-column: 2; /* Place in the second column */
-    grid-row: 2; /* Place in the second row of the second column */
-}
-
-@media (max-width: 600px) {
-    .content {
-        grid-template-columns: 1fr; /* Single column for all elements on small screens */
-        gap: 10px; /* Reduce gap on small screens */
-    }
-
-    #body-image {
-        width: 100%; /* Full width on small screens */
-    }
-
-    #clock, #date {
-        grid-column: 1; /* Both stack in the single column on small screens */
-        grid-row: auto; /* Reset rows for stacking */
-    }
 }
 /* Main content - using parameters from students.css */
 .main-content {
