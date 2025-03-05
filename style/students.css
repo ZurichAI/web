@@ -145,7 +145,20 @@ input[type="radio"] {
             font-weight: bold;
             width: 130px; /* Set the exact width */
             height: 30px; /* Set the exact height */
-
+        }
+        
+        #create-payment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
         }
         
         #edit-contact-btn {
@@ -369,6 +382,55 @@ input[type="radio"] {
             cursor: pointer;
             margin: 10px;
             font-style: italic;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Payment dialog buttons */
+        #cancel-payment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-payment-dialog-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #cancel-confirm-payment-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #save-confirm-payment-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            font-weight: bold;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         

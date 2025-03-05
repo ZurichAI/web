@@ -1,40 +1,27 @@
-// Create payment dialog functions
+// Create payment dialog functions for students page
 function openCreatePaymentDialog() {
+    // Only proceed if exactly one student is selected
+    if (selectedRows.length !== 1) {
+        return;
+    }
+    
+    // Get the selected student
+    const studentId = selectedRows[0];
+    const student = students.find(s => s.id === studentId);
+    
+    if (!student) {
+        console.error('Selected student not found');
+        return;
+    }
+    
     // Clear previous inputs
     document.getElementById('payment-purpose').value = '';
     document.getElementById('payment-amount').value = '';
     
     // Date input permanently removed
     
-    // Populate student dropdown
-    const studentSelect = document.getElementById('payment-student');
-    studentSelect.innerHTML = '<option value="">Select a student</option>';
-    
-    // If a student is selected in the costs or payments table, preselect them
-    let selectedStudentName = '';
-    
-    if (selectedCostRows.length === 1) {
-        const costId = selectedCostRows[0];
-        const cost = costs.find(c => c.id === costId);
-        if (cost) {
-            selectedStudentName = cost.studentName;
-        }
-    } else if (selectedPaymentRows.length === 1) {
-        const paymentId = selectedPaymentRows[0];
-        const payment = payments.find(p => p.id === paymentId);
-        if (payment) {
-            selectedStudentName = payment.studentName;
-        }
-    }
-    
-    // Add all students to the dropdown
-    studentNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        option.selected = name === selectedStudentName;
-        studentSelect.appendChild(option);
-    });
+    // Set the student name
+    document.getElementById('payment-student').value = student.name;
     
     // Validate form to enable/disable save button
     validatePaymentForm();
@@ -49,12 +36,10 @@ function closeCreatePaymentDialog() {
 
 function validatePaymentForm() {
     const amount = document.getElementById('payment-amount').value.trim();
-    const studentSelect = document.getElementById('payment-student');
-    const studentSelected = studentSelect.value !== '';
     
     // Enable save button only if required fields are filled
     const savePaymentDialogBtn = document.getElementById('save-payment-dialog-btn');
-    savePaymentDialogBtn.disabled = !(amount && studentSelected);
+    savePaymentDialogBtn.disabled = !amount;
 }
 
 function openConfirmPaymentDialog() {
@@ -62,8 +47,7 @@ function openConfirmPaymentDialog() {
     // Date input permanently removed
     const purpose = document.getElementById('payment-purpose').value.trim() || 'N/A';
     const amount = document.getElementById('payment-amount').value.trim();
-    const studentSelect = document.getElementById('payment-student');
-    const studentName = studentSelect.options[studentSelect.selectedIndex].text;
+    const studentName = document.getElementById('payment-student').value;
     
     // Validate form
     if (!amount || !studentName) {
@@ -88,9 +72,16 @@ function savePayment() {
     // Date input permanently removed
     const purpose = document.getElementById('payment-purpose').value.trim() || '';
     const amount = parseFloat(document.getElementById('payment-amount').value.trim());
-    const studentSelect = document.getElementById('payment-student');
-    const studentName = studentSelect.options[studentSelect.selectedIndex].text;
-    const studentId = students.find(s => s.name === studentName)?.id || '';
+    const studentName = document.getElementById('payment-student').value;
+    
+    // Find the student ID
+    const student = students.find(s => s.name === studentName);
+    if (!student) {
+        alert('Student not found. Please try again.');
+        return;
+    }
+    
+    const studentId = student.id;
     
     // Disable the save button to prevent multiple submissions
     const saveButton = document.getElementById('save-confirm-payment-btn');
@@ -149,7 +140,7 @@ function savePayment() {
         alert(`Payment created successfully for ${studentName}.`);
         
         // Refresh the display and update totals
-        applyAllFilters();
+        displayStudents(visibleStudents.length > 0 ? visibleStudents : students);
     })
     .catch(error => {
         console.error('Error creating payment:', error);

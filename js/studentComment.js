@@ -94,26 +94,42 @@
         // Update buttons state based on selection
         function updateCreateCommentButtonState() {
             const createCommentBtn = document.getElementById('create-comment-btn');
+            const createPaymentBtn = document.getElementById('create-payment-btn');
             const editContactBtn = document.getElementById('edit-contact-btn');
             const deleteContactBtn = document.getElementById('delete-contact-btn');
+            const createCostBtn = document.getElementById('create-cost-btn');
             
             const hasExactlyOneSelection = selectedRows.length === 1;
+            const hasAnySelection = selectedRows.length > 0;
             
             // Enable buttons only if exactly one row is selected
             createCommentBtn.disabled = !hasExactlyOneSelection;
+            createPaymentBtn.disabled = !hasExactlyOneSelection;
             editContactBtn.disabled = !hasExactlyOneSelection;
             deleteContactBtn.disabled = !hasExactlyOneSelection;
+            
+            // Enable create cost button if any rows are selected
+            createCostBtn.disabled = !hasAnySelection;
             
             // Apply or remove dimmed appearance based on selection
             // Apply dimmed appearance when no rows or multiple rows are selected
             if (!hasExactlyOneSelection) {
                 createCommentBtn.classList.add('button-dimmed');
+                createPaymentBtn.classList.add('button-dimmed');
                 editContactBtn.classList.add('button-dimmed');
                 deleteContactBtn.classList.add('button-dimmed');
             } else {
                 createCommentBtn.classList.remove('button-dimmed');
+                createPaymentBtn.classList.remove('button-dimmed');
                 editContactBtn.classList.remove('button-dimmed');
                 deleteContactBtn.classList.remove('button-dimmed');
+            }
+            
+            // Apply or remove dimmed appearance for create cost button
+            if (!hasAnySelection) {
+                createCostBtn.classList.add('button-dimmed');
+            } else {
+                createCostBtn.classList.remove('button-dimmed');
             }
         }
         

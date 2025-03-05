@@ -1,16 +1,40 @@
 // Instructor data
-let instructors = [
-    {
-        "name": "Яна Стрелецкая",
-        "login": "Yana",
-        "password": "Slava"
-    },
-    {
-        "name": "Вячеслав Бондарчук",
-        "login": "Slava",
-        "password": "Yana"
+// Check if instructors variable already exists (declared in other files)
+if (typeof instructors === 'undefined') {
+    instructors = [
+        {
+            "name": "Яна Стрелецкая",
+            "login": "Yana",
+            "password": "Slava"
+        },
+        {
+            "name": "Вячеслав Бондарчук",
+            "login": "Slava",
+            "password": "Yana"
+        }
+    ];
+} else {
+    // If instructors array already exists, add login credentials if needed
+    const loginCredentials = [
+        {
+            "name": "Яна Стрелецкая",
+            "login": "Yana",
+            "password": "Slava"
+        },
+        {
+            "name": "Вячеслав Бондарчук",
+            "login": "Slava",
+            "password": "Yana"
+        }
+    ];
+    
+    // Only add if not already present
+    for (const cred of loginCredentials) {
+        if (!instructors.some(inst => inst.name === cred.name)) {
+            instructors.push(cred);
+        }
     }
-];
+}
 let currentInstructor = null;
 
 // Function to handle login validation

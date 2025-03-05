@@ -89,6 +89,7 @@
                 <h3>Single-rows action</h3>
                 <p>Select one row to enable buttons.</p>
                 <button id="create-comment-btn" disabled>Create comment</button>
+                <button id="create-payment-btn" disabled>Create payment</button>
                 <button id="edit-contact-btn" disabled>Edit contact</button>
                 <button id="delete-contact-btn" disabled>Delete contact</button>
             </div>
@@ -317,6 +318,159 @@
         </div>
     </div>
     
+    <!-- Dialog for creating payment -->
+    <div class="dialog-overlay" id="create-payment-dialog">
+        <div class="dialog-box" style="width: 500px; max-width: 90%;">
+            <h3 class="dialog-title">Create Payment</h3>
+            <div class="dialog-content">
+                <form id="create-payment-form">
+                    <!-- Date input permanently removed -->
+                    <div class="form-group">
+                        <label for="payment-purpose">Purpose:</label>
+                        <input type="text" id="payment-purpose" class="dialog-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-amount">Amount CHF:</label>
+                        <input type="number" id="payment-amount" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-student">Student Name:</label>
+                        <input type="text" id="payment-student" class="dialog-input" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-payment-btn">Cancel</button>
+                <button id="save-payment-dialog-btn" disabled>Create payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming payment creation -->
+    <div class="dialog-overlay" id="confirm-payment-dialog">
+        <div class="dialog-box" style="width: 500px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Payment Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-payment-message"></p>
+                <div id="confirm-payment-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-payment-btn">No</button>
+                <button id="save-confirm-payment-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for creating cost -->
+    <div class="dialog-overlay" id="create-cost-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Create Cost</h3>
+            <div class="dialog-content">
+                <form id="create-cost-form">
+                    <div class="form-group">
+                        <label for="cost-purpose">Purpose:</label>
+                        <input type="text" id="cost-purpose" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cost-amount">Amount CHF:</label>
+                        <input type="number" id="cost-amount" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Students:</label>
+                        <table class="embedded-table" id="cost-students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Group</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cost-students-table-body">
+                                <!-- Will be populated dynamically -->
+                            </tbody>
+                        </table>
+                        <button type="button" id="add-student-btn">+ Add student</button>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-cost-btn">Cancel</button>
+                <button id="save-cost-btn" disabled>Save cost</button>
+                <button id="save-with-reference-payment-btn" disabled>Save with reference payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming cost creation -->
+    <div class="dialog-overlay" id="confirm-cost-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Cost Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-cost-message"></p>
+                <div id="confirm-cost-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-cost-btn">No</button>
+                <button id="save-confirm-cost-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for creating payment with reference -->
+    <div class="dialog-overlay" id="create-payment-reference-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Create Payment with Reference</h3>
+            <div class="dialog-content">
+                <form id="create-payment-reference-form">
+                    <div class="form-group">
+                        <label for="payment-ref-purpose">Purpose:</label>
+                        <input type="text" id="payment-ref-purpose" class="dialog-input" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Students:</label>
+                        <table class="embedded-table" id="payment-ref-students-table">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Cost to add</th>
+                                    <th>Payment to add</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payment-ref-students-table-body">
+                                <!-- Will be populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-payment-ref-btn">Cancel</button>
+                <button id="save-cost-and-payment-btn">Save cost and payment</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dialog for confirming cost and payment creation -->
+    <div class="dialog-overlay" id="confirm-cost-payment-dialog">
+        <div class="dialog-box" style="width: 600px; max-width: 90%;">
+            <h3 class="dialog-title">Confirm Cost and Payment Creation</h3>
+            <div class="dialog-content">
+                <p id="confirm-cost-payment-message"></p>
+                <div id="confirm-cost-payment-details">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+            <div class="dialog-buttons">
+                <button id="cancel-confirm-cost-payment-btn">No</button>
+                <button id="save-confirm-cost-payment-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="js/config.js"></script>
     <script src="js/studentsInit.js"></script>
     <script src="js/APIs.js"></script>
@@ -326,6 +480,8 @@
     <script src="js/deleteContact.js"></script>
     <script src="js/editContact.js"></script>
     <script src="js/createContact.js"></script>
+    <script src="js/createStudentPayment.js"></script>
+    <script src="js/createCost.js"></script>
     <script src="js/login.js"></script>
 </body>
 </html>

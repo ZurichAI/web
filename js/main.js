@@ -34,10 +34,10 @@ function formatDate(dateString) {
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    // Set default date for cost and payment creation
+    // Set default date for cost creation
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('cost-date').value = today;
-    document.getElementById('payment-date').value = today;
+    // Date input for payment permanently removed
     
     // Fetch data
     fetchStudents();
@@ -197,7 +197,6 @@ function initEventListeners() {
         closeViewCommentsDialog();
         openCommentDialog();
     });
-    
     // Cost dialog buttons
     const cancelCostBtn = document.getElementById('cancel-cost-btn');
     cancelCostBtn.addEventListener('click', closeCreateCostDialog);

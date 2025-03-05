@@ -167,6 +167,9 @@ function displayStudents(filteredStudents = null) {
         });
     });
     
+    // Initial update of button states
+    updateCreateCommentButtonState();
+    
     // Add event listener to "select all" checkbox
     const selectAllCheckbox = document.getElementById('select-all-rows');
     if (selectAllCheckbox) {
@@ -243,6 +246,7 @@ function displayStudents(filteredStudents = null) {
         }
     });
 }
+
 
 // Sort students by field
 function sortStudents(field) {

@@ -109,7 +109,7 @@
                 <button id="clear-filters-btn">Clear all filters</button>
                 <button id="create-comment-btn" disabled>Create comment</button>
                 <button id="create-cost-btn">Create cost</button>
-                <button id="save-payment-btn" disabled>Save payment</button>
+                <button id="save-payment-btn" disabled>Create payment</button>
             </div>
         </div>
         
@@ -231,10 +231,6 @@
             <div class="dialog-content">
                 <form id="create-cost-form">
                     <div class="form-group">
-                        <label for="cost-date">Date:</label>
-                        <input type="date" id="cost-date" class="dialog-input" required>
-                    </div>
-                    <div class="form-group">
                         <label for="cost-purpose">Purpose:</label>
                         <input type="text" id="cost-purpose" class="dialog-input" required>
                     </div>
@@ -292,10 +288,6 @@
             <div class="dialog-content">
                 <form id="create-payment-reference-form">
                     <div class="form-group">
-                        <label for="payment-ref-date">Date:</label>
-                        <input type="date" id="payment-ref-date" class="dialog-input" readonly>
-                    </div>
-                    <div class="form-group">
                         <label for="payment-ref-purpose">Purpose:</label>
                         <input type="text" id="payment-ref-purpose" class="dialog-input" readonly>
                     </div>
@@ -343,13 +335,10 @@
     <!-- Dialog for creating payment -->
     <div class="dialog-overlay" id="create-payment-dialog">
         <div class="dialog-box" style="width: 500px; max-width: 90%;">
-            <h3 class="dialog-title">Save Payment</h3>
+            <h3 class="dialog-title">Create Payment</h3>
             <div class="dialog-content">
                 <form id="create-payment-form">
-                    <div class="form-group">
-                        <label for="payment-date">Date:</label>
-                        <input type="date" id="payment-date" class="dialog-input" required>
-                    </div>
+                    <!-- Date input permanently removed -->
                     <div class="form-group">
                         <label for="payment-purpose">Purpose:</label>
                         <input type="text" id="payment-purpose" class="dialog-input">
@@ -368,7 +357,7 @@
             </div>
             <div class="dialog-buttons">
                 <button id="cancel-payment-btn">Cancel</button>
-                <button id="save-payment-dialog-btn" disabled>Save payment</button>
+                <button id="save-payment-dialog-btn" disabled>Create payment</button>
             </div>
         </div>
     </div>
@@ -401,4 +390,3 @@
     <script src="js/login.js"></script>
 </body>
 </html>
-
