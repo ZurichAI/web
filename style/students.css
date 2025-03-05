@@ -1,5 +1,95 @@
 /* Additional styles for student management */
-        
+
+/* Student management header */
+.student-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#search-input {
+    width: 250px;
+    height: 30px;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+
+/* Container for student page */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: whitesmoke;
+    border: 1px solid #ccc;
+}
+
+.search-container {
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+/* Additional table styles */
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    cursor: pointer;
+    position: relative;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr {
+    height: 30px;
+}
+
+/* Checkbox and radio styling */
+.checkbox-container {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-container label {
+    margin-left: 5px;
+}
+
+.radio-container {
+    margin-bottom: 5px;
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+    align-items: center;
+}
+
+.radio-container input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* Input styling */
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #007bff; /* Blue checkboxes */
+}
+
+input[type="radio"] {
+    accent-color: #007bff; /* Blue radio buttons */
+}
+
         /* Dialog styles */
         .dialog-overlay {
             position: fixed;
@@ -377,4 +467,3 @@
         #students-table tbody tr {
             cursor: pointer;
         }
-        

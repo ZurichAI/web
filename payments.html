@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex">
     <meta name="description" content="Payment Management System">
     <title>Payment Management</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style/globalStyle.css">
     <link rel="stylesheet" href="style/payments.css">
 </head>
 <body>
@@ -77,20 +77,30 @@
                 </div>
             </div>
             
-            <!-- Date Filter -->
-            <div class="filter-box date-filter">
-                <h3>Filter by Date</h3>
-                <div class="date-inputs">
-                    <div class="form-group">
-                        <label for="date-from">From:</label>
-                        <input type="date" id="date-from" class="dialog-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="date-to">To:</label>
-                        <input type="date" id="date-to" class="dialog-input">
-                    </div>
-                </div>
-            </div>
+<!-- Date Filter -->
+<div class="filter-box date-filter">
+    <h3>Filter by Date</h3>
+    
+    <!-- Row with labels -->
+    <div class="date-filter-row">
+        <div class="date-filter-column">
+            <label for="date-from">From:</label>
+        </div>
+        <div class="date-filter-column">
+            <label for="date-to">To:</label>
+        </div>
+    </div>
+    
+    <!-- Row with inputs -->
+    <div class="date-filter-row">
+        <div class="date-filter-column">
+            <input type="date" id="date-from" class="dialog-input">
+        </div>
+        <div class="date-filter-column">
+            <input type="date" id="date-to" class="dialog-input">
+        </div>
+    </div>
+</div>
             
 
         

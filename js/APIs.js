@@ -25,17 +25,31 @@ async function fetchStudents() {
             name: record.fields.Name || '',
             group: record.fields.Group || '',
             instructor: record.fields.Instructor || '',
+            birthday: record.fields.Birthday || '',
+            startDate: record.fields["Start Date"] || '',
             active: record.fields.Active === true
         }));
         
+        // Initialize visibleStudents with all students (needed for students.html)
+        if (typeof visibleStudents !== 'undefined') {
+            visibleStudents = [...students];
+        }
+        
         // Extract unique student names for the student filter
-        studentNames = [...new Set(students.map(student => student.name))].filter(Boolean).sort();
+        if (typeof studentNames !== 'undefined') {
+            studentNames = [...new Set(students.map(student => student.name))].filter(Boolean).sort();
+        }
         
         // Extract unique instructors and groups
         extractUniqueValues();
         
         // Populate filter checkboxes
         populateFilterCheckboxes();
+        
+        // Display students if the function exists (needed for students.html)
+        if (typeof displayStudents === 'function') {
+            displayStudents();
+        }
     } catch (error) {
         console.error('Error fetching students:', error);
         alert('Error fetching students data. Please try again.');
@@ -63,14 +77,8 @@ async function fetchCosts() {
         const data = await response.json();
         console.log('GET operation - Costs response data:', data);
         
-        // Add this console.log to inspect the raw records
-        console.log('Raw cost records from Airtable:', data.records);
-        
         // Format Airtable records to cost objects
-        costs = data.records.map(record => {
-            // Add this console.log to inspect each record's fields
-            console.log('Cost record fields:', record.fields);
-            
+        costs = data.records.map(record => {            
             return {
                 id: record.id,
                 date: record.fields.CreatedDateTime || '',
@@ -162,5 +170,48 @@ async function fetchPayments() {
     } catch (error) {
         console.error('Error fetching payments:', error);
         alert('Error fetching payments data. Please try again.');
+    }
+}
+
+// Fetch dossier data from Airtable
+async function fetchDossiers() {
+    try {
+        console.log('GET operation - Sending dossier request...');
+        const airtableApiUrl = `https://api.airtable.com/v0/${config.airtable.baseId}/${config.airtable.tables.dossiers}`;
+        
+        const response = await fetch(airtableApiUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${config.airtable.apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Airtable API error: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('GET operation - Dossier response data:', data);
+        
+        // Format Airtable records to dossier objects
+        dossiers = data.records.map(record => ({
+            id: record.id,
+            timestamp: record.fields.Timestamp || '',
+            studentID: record.fields.studentID || '',
+            createdBy: record.fields['Created By'] || '',
+            record: record.fields.Record || ''
+        }));
+        
+        // Sort dossiers by timestamp descending by default
+        dossiers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Update student table to show dossier indicators
+        if (students.length > 0) {
+            displayStudents(visibleStudents.length > 0 ? visibleStudents : students);
+        }
+    } catch (error) {
+        console.error('Error fetching dossiers:', error);
+        // Show error message
     }
 }
