@@ -78,13 +78,21 @@
             </div>
         
             <!-- Buttons -->
-            <div class="button-container">
+            <div class="button-container-multi">
+                <h3>Any rows action</h3>
                 <button id="clear-filters-btn" >Clear all filters</button>
+                <button id="create-cost-btn" disabled>Create cost</button>
+                <button id="create-contact-btn">Create contact</button>
+            </div>
+
+            <div class="button-container-single">
+                <h3>Single-rows action</h3>
+                <p>Select one row to enable buttons.</p>
                 <button id="create-comment-btn" disabled>Create comment</button>
                 <button id="edit-contact-btn" disabled>Edit contact</button>
-                <button id="create-contact-btn">Create contact</button>
                 <button id="delete-contact-btn" disabled>Delete contact</button>
             </div>
+
         </div>
        
         <div class="main-content">
@@ -93,7 +101,7 @@
                 <table id="students-table">
                     <thead>
                         <tr>
-                            <th style="width: 30px;"><input type="checkbox" id="select-all-rows" disabled title="Only single selection is allowed"></th>
+                            <th style="width: 30px;"><input type="checkbox" id="select-all-rows"></th>
                             <th data-sort="name">Name</th>
                             <th data-sort="group">Group</th>
                             <th data-sort="instructor">Instructor</th>

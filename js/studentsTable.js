@@ -160,20 +160,24 @@ function displayStudents(filteredStudents = null) {
         studentsTableBody.appendChild(row);
     });
     
-    // Add event listeners to row checkboxes for single selection
+    // Add event listeners to row checkboxes for selection
     document.querySelectorAll('.row-select').forEach(checkbox => {
         checkbox.addEventListener('change', function(event) {
-            if (this.checked) {
-                // Uncheck all other checkboxes
-                document.querySelectorAll('.row-select').forEach(cb => {
-                    if (cb !== this) {
-                        cb.checked = false;
-                    }
-                });
-            }
             updateSelectedRows(event);
         });
     });
+    
+    // Add event listener to "select all" checkbox
+    const selectAllCheckbox = document.getElementById('select-all-rows');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            // Check or uncheck all row checkboxes based on the "select all" checkbox
+            document.querySelectorAll('.row-select').forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedRows();
+        });
+    }
     
     // Add click event listeners to rows for selection
     document.querySelectorAll('#students-table tbody tr').forEach(row => {
@@ -195,20 +199,37 @@ function displayStudents(filteredStudents = null) {
                 // Toggle the checkbox
                 checkbox.checked = !checkbox.checked;
                 
-                // If checked, uncheck all other checkboxes
-                if (checkbox.checked) {
-                    document.querySelectorAll('.row-select').forEach(cb => {
-                        if (cb !== checkbox) {
-                            cb.checked = false;
-                        }
-                    });
-                }
-                
                 // Update selected rows
                 updateSelectedRows({ target: checkbox });
+                
+                // Update "select all" checkbox state
+                updateSelectAllCheckbox();
             }
         });
     });
+    
+    // Function to update "select all" checkbox state based on individual checkboxes
+    function updateSelectAllCheckbox() {
+        const selectAllCheckbox = document.getElementById('select-all-rows');
+        const rowCheckboxes = document.querySelectorAll('.row-select');
+        const checkedRowCheckboxes = document.querySelectorAll('.row-select:checked');
+        
+        if (selectAllCheckbox) {
+            // If all row checkboxes are checked, check the "select all" checkbox
+            // If some row checkboxes are checked, make "select all" indeterminate
+            // If no row checkboxes are checked, uncheck the "select all" checkbox
+            if (checkedRowCheckboxes.length === rowCheckboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedRowCheckboxes.length > 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+    }
     
     // Add event listeners to comment cells with dossier records
     document.querySelectorAll('#students-table-body td[data-id]').forEach(cell => {

@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize event listeners
 function initEventListeners() {
+    // Initialize button states
+    updateCreateCommentButtonState();
+    
     // Search functionality
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', filterStudents);

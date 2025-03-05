@@ -182,6 +182,21 @@ input[type="radio"] {
             width: 130px; /* Set the exact width */
             height: 30px; /* Set the exact height */
         }
+
+        #create-cost-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: bold;
+            width: 130px; /* Set the exact width */
+            height: 30px; /* Set the exact height */
+
+        }
         
         #clear-filters-btn {
             background-color: green;
@@ -360,7 +375,7 @@ input[type="radio"] {
         }
         .filters-container {
             display: grid;
-            grid-template-columns: 2fr 2fr 1fr; /* Decreased the width of the third column */
+            grid-template-columns: 2fr 2fr 1fr 1fr; /* Decreased the width of the third column */
             grid-template-rows: auto 1fr; /* Two rows */
             gap: 10px;
             margin-bottom: 20px;
@@ -373,14 +388,22 @@ input[type="radio"] {
             font-size: 0.75em;
         }
         
-        .button-container {
-            grid-column: 3;
+        .button-container-multi {
+            grid-column: 4;
             grid-row: 1/2; /* Span two rows */
             height: 200px; /* Фиксированная высота */
             display: flex;
             flex-direction: column;
             gap: 10px;      
-    }
+        }
+        .button-container-single {
+            grid-column: 3;
+            grid-row: 1/2; /* Span two rows */
+            height: 200px; /* Фиксированная высота */
+            display: flex;
+            flex-direction: column;
+            gap: 5px;      
+        }
         /* Фильтр по инструкторам – занимает 2 строки */
         .instructor-filter {
             grid-column: 1;
@@ -456,6 +479,12 @@ input[type="radio"] {
             background-color: #e3f2fd; /* Light blue background */
             font-weight: bold; /* Make text slightly bolder */
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+        }
+        
+        /* Styling for dimmed buttons */
+        .button-dimmed {
+            opacity: 0.5; /* Reduce opacity to make it look dimmed */
+            cursor: not-allowed; /* Change cursor to indicate it's not clickable */
         }
         
         /* Override the alternating row color when selected */

@@ -142,11 +142,11 @@ function initEventListeners() {
 function handleLogin(event) {
     event.preventDefault();
     
-    const name = document.getElementById('name').value;
+    const login = document.getElementById('login').value;
     const password = document.getElementById('password').value;
     
     // Find instructor with matching credentials
-    const instructor = instructors.find(i => i.name === name && i.password === password);
+    const instructor = instructors.find(i => i.login === login && i.password === password);
     
     if (instructor) {
         // Store user info (excluding password)
@@ -160,7 +160,7 @@ function handleLogin(event) {
         fetchStudents();
     } else {
         // Show error message
-        loginAlert.textContent = 'Invalid name or password';
+        loginAlert.textContent = 'Invalid login or password';
         loginAlert.style.display = 'block';
     }
 }
@@ -633,40 +633,4 @@ async function deleteStudent(studentId) {
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize instructor portal elements if they exist
     initInstructorElements();
-
-    // Login form handling
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const name = document.getElementById('name').value;
-        const password = document.getElementById('password').value;
-        // ...handle login logic...
-    });
-
-    // Add student form handling
-    const addStudentForm = document.getElementById('add-student-form');
-    addStudentForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const newName = document.getElementById('new-name').value;
-        const newGroup = document.getElementById('new-group').value;
-        const newInstructor = document.getElementById('new-instructor').value;
-        const newBirthday = document.getElementById('new-birthday').value;
-        const newStartDate = document.getElementById('new-startDate').value;
-        const newActive = document.getElementById('new-active').value;
-        // ...handle adding new student logic...
-    });
-
-    // Edit student form handling
-    const editStudentForm = document.getElementById('edit-student-form');
-    editStudentForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        const editId = document.getElementById('edit-id').value;
-        const editName = document.getElementById('edit-name').value;
-        const editGroup = document.getElementById('edit-group').value;
-        const editInstructor = document.getElementById('edit-instructor').value;
-        const editBirthday = document.getElementById('edit-birthday').value;
-        const editStartDate = document.getElementById('edit-startDate').value;
-        const editActive = document.getElementById('edit-active').value;
-        // ...handle editing student logic...
-    });
 });

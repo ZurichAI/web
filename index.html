@@ -4,45 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <meta name="description" content="This website is a sandbox environment used for testing code, debugging, and development experiments. Content displayed here is not official and should not be considered as a product.">
-    <title>Test Page</title>
+    <meta name="description" content="Instructor Portal">
+    <title>Instructor Portal</title>
     <link rel="stylesheet" href="style/globalStyle.css">
+    <style>
+        /* Dialog styles from students.css */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .dialog-box {
+            background-color: whitesmoke;
+            padding: 20px;
+            border-radius: 5px;
+            width: 400px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dialog-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 2em;
+            color: #0003b8; /* Blue color */
+        }
+        
+        .dialog-content {
+            margin-bottom: 20px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        /* Button styles from students.css */
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .big-button {
+            width: 250px;
+            height: 50px;
+            font-size: 16px;
+            margin: 10px;
+            display: block;
+        }
+        
+        .error-message {
+            color: red;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: whitesmoke;
+            border: 1px solid #ccc;
+            display: none; /* Hidden by default until login */
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="Slava Logo" style="height: 40px;">
-            <span>Home</span>
-        </a>
-        <nav>
-                <a href="about.html">About</a>
-                <a href="instructor.html">Instructor portal</a>
-                <a href="#">Our Services</a>
-                <a href="#">Log In</a>
-        </nav>
-    </header>
-    <h1>
-        This website is a sandbox environment used for testing code, debugging, and development experiments. Content displayed here is not official 
-        and should not be considered as a product.
-    </h1>
-    <p>This is <strong>bold text</strong> using strong, and this is <b>bold text</b> using b.</p>
-    <p>This is <em>italic text</em> using em, and this is <i>italic text</i> using i.</p>
-    <h1>Header 1 - Largest Heading</h1>
-<h2>Header 2 - Slightly Smaller</h2>
-<h3>Header 3 - Even Smaller</h3>
-<h4>Header 4 - Smaller Still</h4>
-<h5>Header 5 - Very Small</h5>
-<h6>Header 6 - Smallest Heading</h6>
-<p>This is a regular paragraph of text. You can add <strong>bold</strong> or <em>italic</em> within it.</p>
-    <div class="content">
-        <img src="images/ai_image2.png" alt="A scenic landscape" id="body-image">
-        <div id="clock"></div>
-        <div id="date"></div>
+
+    <!-- Login Dialog -->
+    <div class="dialog-overlay" id="login-dialog">
+        <div class="dialog-box">
+            <h3 class="dialog-title">Instructor Login</h3>
+            <div class="dialog-content">
+                <div class="error-message" id="login-error">Invalid login or password</div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login">Login:</label>
+                        <input type="text" id="login" class="dialog-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" class="dialog-input" required>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button type="submit" id="login-btn">Login</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <footer>
-        <p>© 2021 ZurichAI. All rights reserved.</p>
-    </footer>
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+    
+    <!-- Main Content (hidden until login) -->
+    <div class="container" id="main-content">
+        <h1 id="welcome-message">Hello, Instructor</h1>
+        <p>With this tool you can:</p>
+        <button class="big-button" onclick="window.location.href='students.html'">Administrate all students</button>
+        <button class="big-button" onclick="window.location.href='payments.html'">Administrate finance</button>
+        <button id="logout-btn" class="big-button" style="background-color: #e74c3c;">Logout</button>    </div>
+    
+    <script>
+        // Load instructors data
+        let instructors = [
+            {
+                "name": "Яна Стрелецкая",
+                "login": "Yana",
+                "password": "Slava"
+            },
+            {
+                "name": "Вячеслав Бондарчук",
+                "login": "Slava",
+                "password": "Yana"
+            }
+        ];
+        let currentInstructor = null;
+        
+        // Function to handle login validation
+        function validateLogin() {
+            const loginInput = document.getElementById('login').value;
+            const passwordInput = document.getElementById('password').value;
+            
+            // Validate login
+            const instructor = instructors.find(
+                inst => inst.login === loginInput && inst.password === passwordInput
+            );
+            
+            if (instructor) {
+                // Successful login
+                currentInstructor = instructor;
+                document.getElementById('login-dialog').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('welcome-message').textContent = `Hello, ${instructor.name}`;
+            } else {
+                // Failed login
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        // Login button click event
+        document.getElementById('login-btn').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default button behavior
+            validateLogin();
+        });
+        
+        // Form submit event (for Enter key)
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+            validateLogin();
+        });
+        
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            currentInstructor = null;
+            document.getElementById('login-dialog').style.display = 'flex';
+            document.getElementById('main-content').style.display = 'none';
+            document.getElementById('login').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('login-error').style.display = 'none';
+        });
+    </script>
 </body>
 </html>

@@ -57,7 +57,7 @@
             document.getElementById('view-comments-dialog').style.display = 'none';
         }
         
-        // Update selected rows array - only allow one selection at a time
+        // Update selected rows array - allow multiple selections
         function updateSelectedRows(event) {
             // Get the checkbox that triggered this event (if any)
             const clickedCheckbox = event ? event.target : null;
@@ -70,7 +70,7 @@
                 row.classList.remove('selected-row');
             });
             
-            // Get the currently checked checkbox (should be only one or none)
+            // Get all checked checkboxes
             document.querySelectorAll('.row-select:checked').forEach(checkbox => {
                 const studentId = checkbox.getAttribute('data-id');
                 selectedRows.push(studentId);
@@ -84,8 +84,11 @@
             
             console.log('Selected rows:', selectedRows);
             
-            // Update create comment button state
+            // Update button states based on selection
             updateCreateCommentButtonState();
+            
+            // Update "select all" checkbox state
+            updateSelectAllCheckbox();
         }
         
         // Update buttons state based on selection
@@ -94,11 +97,47 @@
             const editContactBtn = document.getElementById('edit-contact-btn');
             const deleteContactBtn = document.getElementById('delete-contact-btn');
             
-            const hasSelection = selectedRows.length === 1;
+            const hasExactlyOneSelection = selectedRows.length === 1;
             
-            createCommentBtn.disabled = !hasSelection;
-            editContactBtn.disabled = !hasSelection;
-            deleteContactBtn.disabled = !hasSelection;
+            // Enable buttons only if exactly one row is selected
+            createCommentBtn.disabled = !hasExactlyOneSelection;
+            editContactBtn.disabled = !hasExactlyOneSelection;
+            deleteContactBtn.disabled = !hasExactlyOneSelection;
+            
+            // Apply or remove dimmed appearance based on selection
+            // Apply dimmed appearance when no rows or multiple rows are selected
+            if (!hasExactlyOneSelection) {
+                createCommentBtn.classList.add('button-dimmed');
+                editContactBtn.classList.add('button-dimmed');
+                deleteContactBtn.classList.add('button-dimmed');
+            } else {
+                createCommentBtn.classList.remove('button-dimmed');
+                editContactBtn.classList.remove('button-dimmed');
+                deleteContactBtn.classList.remove('button-dimmed');
+            }
+        }
+        
+        // Function to update "select all" checkbox state based on individual checkboxes
+        function updateSelectAllCheckbox() {
+            const selectAllCheckbox = document.getElementById('select-all-rows');
+            const rowCheckboxes = document.querySelectorAll('.row-select');
+            const checkedRowCheckboxes = document.querySelectorAll('.row-select:checked');
+            
+            if (selectAllCheckbox) {
+                // If all row checkboxes are checked, check the "select all" checkbox
+                // If some row checkboxes are checked, make "select all" indeterminate
+                // If no row checkboxes are checked, uncheck the "select all" checkbox
+                if (checkedRowCheckboxes.length === rowCheckboxes.length) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (checkedRowCheckboxes.length > 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                }
+            }
         }
         
         // Open comment dialog
