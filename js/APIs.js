@@ -26,7 +26,7 @@ async function fetchStudents() {
             group: record.fields.Group || '',
             instructor: record.fields.Instructor || '',
             birthday: record.fields.Birthday || '',
-            startDate: record.fields["Start Date"] || '',
+            startDate: record.fields["StartDate"] || '',
             active: record.fields.Active === true
         }));
         

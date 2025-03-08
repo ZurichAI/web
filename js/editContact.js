@@ -149,7 +149,7 @@ async function saveStudentChanges() {
                 Group: group,
                 Birthday: birthday,
                 Instructor: instructor,
-                "Start Date": startDate,
+                "StartDate": startDate,
                 Active: active
             }
         };

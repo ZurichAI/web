@@ -140,7 +140,7 @@ async function saveNewStudent() {
                 Group: group,
                 Birthday: birthday,
                 Instructor: instructor,
-                "Start Date": startDate,
+                "StartDate": startDate,
                 Active: active
             }
         };
