@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex">
-    <meta name="description" content="Instructor Portal">
-    <title>Instructor Portal</title>
-    <link rel="stylesheet" href="style/globalStyle.css">
-    <link rel="stylesheet" href="style/index.css">
+    <title>Under Development</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: auto;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        a {
+            color: #0073e6;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-
-    <!-- Login Dialog -->
-    <div class="dialog-overlay" id="login-dialog">
-        <div class="dialog-box">
-            <h3 class="dialog-title">Instructor Login</h3>
-            <div class="dialog-content">
-                <div class="error-message" id="login-error">Invalid login or password</div>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login">Login:</label>
-                        <input type="text" id="login" class="dialog-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" class="dialog-input" required>
-                    </div>
-                    <div class="dialog-buttons">
-                        <button type="submit" id="login-btn">Login</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <div class="container">
+        <h1>Page Under Development</h1>
+        <p>Thank you for visiting! This page is still being developed.</p>
+        <p>If you have any questions, feel free to contact:</p>
+        <p><a href="mailto:vyacheslav@bondarchuk.consulting">vyacheslav@bondarchuk.consulting</a></p>
     </div>
-    
-    <!-- Main Content (hidden until login) -->
-    <div class="container" id="main-content">
-        <h1 id="welcome-message">Hello, Instructor</h1>
-        <p>With this tool you can:</p>
-        <button class="big-button" onclick="window.location.href='students.html'">Administrate all students</button>
-        <button class="big-button" onclick="window.location.href='payments.html'">Administrate finance</button>
-        <button id="logout-btn" class="big-button">Logout</button>    </div>
-    
-    <script src="js/login.js"></script>
 </body>
 </html>
